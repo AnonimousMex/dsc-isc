@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+
+# env
+.env
+.env.local
+!.env.example
+
+# api runtime data
+apps/api/prisma/dev.db
+apps/api/prisma/dev.db-journal
+apps/api/storage/uploads/**
+!apps/api/storage/uploads/**/.gitkeep
+
+# editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# testing
+coverage/
+playwright-report/
+test-results/
+tests/e2e/.seed-credentials.json
