@@ -1,0 +1,240 @@
+// Ver README.md → "Migrar a Postgres/S3" para los 2 pasos de migración.
+// Nota: donde en Postgres usaríamos el tipo `Json`, aquí usamos `String` con
+// JSON serializado a mano (JSON.stringify/JSON.parse en src/services/) —
+// es la forma correcta de trabajar con SQLite en Prisma y permite que ese
+// mismo campo pase a `Json` nativo sin rediseñar el resto del modelo.
+//
+// Nota sobre enums: el conector de SQLite de Prisma NO soporta `enum`
+// nativo (a diferencia de Postgres/MySQL). Los campos que en el documento
+// de producto se describen como enum (Role, MediaKind, SourceType) se
+// modelan aquí como `String` y se validan con los union types de
+// packages/shared (`Role`, `MediaKind`, `SourceType`) y los esquemas Zod
+// correspondientes en cada servicio antes de escribir a la base de datos.
+// Al migrar a Postgres esto puede volver a un `enum` nativo sin tocar el
+// resto del modelo.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         String     @default("EDITOR") // Role: SUPERADMIN | EDITOR | VIEWER
+  totpSecret   String?
+  isActive     Boolean    @default(true)
+  mustChangePassword Boolean @default(false)
+  failedLoginAttempts Int    @default(0)
+  lockedUntil  DateTime?
+  createdAt    DateTime   @default(now())
+  auditLogs    AuditLog[]
+  refreshTokens RefreshToken[]
+}
+
+// Permite rotar y revocar refresh tokens individualmente (logout, cambio de
+// contraseña, detección de reuso) sin depender de una sola bandera global.
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  before     String?
+  after      String?
+  createdAt  DateTime @default(now())
+}
+
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+model MediaAsset {
+  id         String       @id @default(cuid())
+  kind       String       // MediaKind: IMAGE | VIDEO | DOCUMENT
+  sourceType String       // SourceType: LOCAL | EXTERNAL
+  path       String
+  alt        String?
+  createdAt  DateTime     @default(now())
+  heroSlides HeroSlide[]
+  programsReticula Program[] @relation("programReticulaImage")
+  programsPdf      Program[] @relation("programReticulaPdf")
+  teachers   Teacher[]
+  labImages  LabImage[]
+  specialties Specialty[]
+  documents  Document[]
+  news       News[]
+}
+
+model HeroSlide {
+  id          String     @id @default(cuid())
+  order       Int
+  mediaId     String
+  media       MediaAsset @relation(fields: [mediaId], references: [id])
+  captionCode String
+  isActive    Boolean    @default(true)
+}
+
+model TimelineEvent {
+  id          String  @id @default(cuid())
+  year        String
+  title       String
+  description String
+  order       Int
+  isActive    Boolean @default(true)
+}
+
+model Program {
+  id               String      @id @default(cuid())
+  slug             String      @unique
+  name             String
+  mission          String
+  vision           String
+  goals            String
+  admissionProfile String
+  graduateProfile  String
+  actionField      String
+  videoUrl         String?
+  reticulaImageId  String?
+  reticulaImage    MediaAsset? @relation("programReticulaImage", fields: [reticulaImageId], references: [id])
+  reticulaPdfId    String?
+  reticulaPdf      MediaAsset? @relation("programReticulaPdf", fields: [reticulaPdfId], references: [id])
+  subjects         Subject[]
+}
+
+model Subject {
+  id            String                 @id @default(cuid())
+  code          String                 @unique
+  name          String
+  semester      Int
+  objective     String
+  program       Program                @relation(fields: [programId], references: [id])
+  programId     String
+  teachers      TeacherSubject[]
+  prerequisites SubjectPrerequisite[]  @relation("subject")
+  requiredBy    SubjectPrerequisite[]  @relation("prerequisite")
+}
+
+model SubjectPrerequisite {
+  id             String  @id @default(cuid())
+  // Si se borra la materia dependiente, sus propios enlaces de prerrequisito
+  // no tienen sentido y se borran con ella (Cascade). Si se intenta borrar
+  // una materia que OTRAS todavía listan como prerrequisito, se bloquea
+  // (Restrict, comportamiento por defecto) hasta quitar esa dependencia
+  // primero — protege la integridad de la retícula.
+  subject        Subject @relation("subject", fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId      String
+  prerequisite   Subject @relation("prerequisite", fields: [prerequisiteId], references: [id])
+  prerequisiteId String
+
+  @@unique([subjectId, prerequisiteId])
+}
+
+model Teacher {
+  id         String           @id @default(cuid())
+  slug       String           @unique
+  fullName   String
+  title      String
+  bio        String
+  experience String
+  photoId    String?
+  photo      MediaAsset?      @relation(fields: [photoId], references: [id])
+  youtubeUrl String?
+  email      String?
+  website    String?
+  linkedin   String?
+  facebook   String?
+  twitter    String?
+  isActive   Boolean          @default(true)
+  subjects   TeacherSubject[]
+}
+
+model TeacherSubject {
+  id        String  @id @default(cuid())
+  // Asignación docente-materia: si se borra cualquiera de los dos lados,
+  // la asignación deja de tener sentido y se borra con ellos.
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId String
+
+  @@unique([teacherId, subjectId])
+}
+
+model Lab {
+  id              String     @id @default(cuid())
+  slug            String     @unique
+  name            String
+  description     String
+  equipment       String
+  relatedSubjects String?
+  gallery         LabImage[]
+}
+
+model LabImage {
+  id      String     @id @default(cuid())
+  lab     Lab        @relation(fields: [labId], references: [id], onDelete: Cascade)
+  labId   String
+  mediaId String
+  media   MediaAsset @relation(fields: [mediaId], references: [id])
+  order   Int
+}
+
+model Specialty {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String
+  imageId     String?
+  image       MediaAsset? @relation(fields: [imageId], references: [id])
+}
+
+model Document {
+  id        String     @id @default(cuid())
+  title     String
+  category  String
+  mediaId   String
+  media     MediaAsset @relation(fields: [mediaId], references: [id])
+  updatedAt DateTime   @updatedAt
+}
+
+model News {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  title        String
+  excerpt      String
+  body         String
+  coverImageId String?
+  coverImage   MediaAsset? @relation(fields: [coverImageId], references: [id])
+  publishedAt  DateTime?
+  isPublished  Boolean     @default(false)
+}
+
+model CommunitySection {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  title     String
+  body      String
+  documents String?
+}
