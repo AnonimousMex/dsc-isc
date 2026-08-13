@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import type { TeacherSummary } from '@dsc-isc/shared';
+import { toYoutubeEmbedUrl, type TeacherSummary } from '@dsc-isc/shared';
 import CircuitBoard from '../components/reticula/CircuitBoard';
 import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
@@ -53,7 +53,7 @@ export default function OfertaEducativa() {
           {program.videoUrl ? (
             <div className="mt-4 aspect-video overflow-hidden rounded-lg bg-elevated">
               <iframe
-                src={program.videoUrl}
+                src={toYoutubeEmbedUrl(program.videoUrl)}
                 title={`Video institucional de ${program.name}`}
                 className="h-full w-full"
                 loading="lazy"
