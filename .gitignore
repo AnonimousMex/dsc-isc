@@ -25,3 +25,6 @@ coverage/
 playwright-report/
 test-results/
 tests/e2e/.seed-credentials.json
+
+apps/api/prisma/**/*.db
+apps/api/prisma/**/*.db-journal
