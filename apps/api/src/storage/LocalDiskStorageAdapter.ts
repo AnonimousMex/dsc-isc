@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { env } from '../lib/env.js';
 import type { SaveFileMeta, SaveFileResult, StorageAdapter } from './StorageAdapter.js';
 
 const UPLOADS_ROOT = path.resolve(process.cwd(), 'storage', 'uploads');
@@ -45,6 +46,10 @@ export class LocalDiskStorageAdapter implements StorageAdapter {
   }
 
   getPublicUrl(relativePath: string): string {
-    return `/uploads/${relativePath}`;
+    // Debe ser absoluta (contrato de StorageAdapter): apps/web y apps/admin
+    // corren en otro origen que la API, así que una ruta relativa como
+    // "/uploads/..." se resolvería contra el origen equivocado (el del SPA,
+    // no el de la API) y el navegador nunca encontraría el archivo.
+    return `${env.apiPublicUrl}/uploads/${relativePath}`;
   }
 }
