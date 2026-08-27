@@ -9,6 +9,10 @@ export function getTotpProvisioningUri(email: string, secret: string): string {
 }
 
 export async function verifyTotpCode(secret: string, code: string): Promise<boolean> {
-  const result = await verify({ secret, token: code, epochTolerance: 1 });
+  // epochTolerance está en SEGUNDOS (no en "pasos" de 30s) — con 1 casi no
+  // había margen real, lo que rechazaba códigos válidos con cualquier
+  // demora humana normal al escribirlos. 90s cubre un paso completo de
+  // holgura en cada dirección.
+  const result = await verify({ secret, token: code, epochTolerance: 90 });
   return result.valid;
 }

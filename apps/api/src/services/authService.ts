@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, randomInt, randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
 import { hashPassword, verifyPassword } from '../lib/passwords.js';
@@ -10,11 +10,13 @@ import {
 } from '../lib/jwt.js';
 import { generateTotpSecret, getTotpProvisioningUri, verifyTotpCode } from '../lib/totp.js';
 import { env } from '../lib/env.js';
+import { sendPasswordResetEmail } from '../lib/mailer.js';
 import { HttpError } from '../middleware/errorHandler.js';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 const TOTP_SETUP_TOKEN_TTL = '10m';
+const PASSWORD_RESET_CODE_TTL_MS = 15 * 60 * 1000;
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -241,6 +243,68 @@ export async function changePassword(
   // Cambiar contraseña cierra el resto de sesiones activas por seguridad.
   await prisma.refreshToken.updateMany({
     where: { userId, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+}
+
+function generateResetCode(): string {
+  return randomInt(0, 1_000_000).toString().padStart(6, '0');
+}
+
+/**
+ * Genera y envía por correo un código de recuperación de 6 dígitos, válido
+ * 15 minutos. Deliberadamente no distingue en la respuesta si el correo
+ * existe o no (evita que alguien use este endpoint para enumerar cuentas) —
+ * el llamador siempre responde el mismo mensaje genérico.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.isActive) return;
+
+  const code = generateResetCode();
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordResetCodeHash: hashToken(code),
+      passwordResetExpiresAt: new Date(Date.now() + PASSWORD_RESET_CODE_TTL_MS),
+    },
+  });
+
+  await sendPasswordResetEmail(user.email, code);
+}
+
+export async function resetPasswordWithCode(
+  email: string,
+  code: string,
+  newPassword: string,
+): Promise<void> {
+  const invalidCode = () => new HttpError(400, 'Código inválido o expirado');
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.passwordResetCodeHash || !user.passwordResetExpiresAt) {
+    throw invalidCode();
+  }
+  if (user.passwordResetExpiresAt.getTime() < Date.now()) {
+    throw invalidCode();
+  }
+  if (user.passwordResetCodeHash !== hashToken(code)) {
+    throw invalidCode();
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash,
+      mustChangePassword: false,
+      passwordResetCodeHash: null,
+      passwordResetExpiresAt: null,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+    },
+  });
+  await prisma.refreshToken.updateMany({
+    where: { userId: user.id, revokedAt: null },
     data: { revokedAt: new Date() },
   });
 }

@@ -27,6 +27,11 @@ model User {
   mustChangePassword Boolean @default(false)
   failedLoginAttempts Int    @default(0)
   lockedUntil  DateTime?
+  // Recuperación de contraseña por correo: se guarda el hash del código (no
+  // el código en sí, igual que la contraseña) y su expiración. Un solo
+  // código pendiente a la vez — pedir uno nuevo invalida el anterior.
+  passwordResetCodeHash String?
+  passwordResetExpiresAt DateTime?
   createdAt    DateTime   @default(now())
   auditLogs    AuditLog[]
   refreshTokens RefreshToken[]
