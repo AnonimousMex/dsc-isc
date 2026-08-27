@@ -20,8 +20,8 @@ function RackUnit({ position, emissive = false }: RackUnitProps) {
     <mesh ref={ref} position={position}>
       <boxGeometry args={[2, 0.3, 1]} />
       <meshStandardMaterial
-        color="#0F2A47"
-        emissive={emissive ? '#3FB8D6' : '#000000'}
+        color="#0B1F13"
+        emissive={emissive ? '#8DC63F' : '#000000'}
         emissiveIntensity={emissive ? 1 : 0}
       />
     </mesh>

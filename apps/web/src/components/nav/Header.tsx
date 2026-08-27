@@ -7,8 +7,18 @@ import MobileNav from './MobileNav';
 // Rutas con hero cinematográfico a pantalla completa (sección 5.3): el
 // header arranca transparente sobre la imagen/video y se "viste" (fondo
 // sólido) al hacer scroll — patrón Gucci/Louis Vuitton descrito en 2.3.
-const CINEMATIC_EXACT_ROUTES = new Set(['/', '/laboratorios']);
-const CINEMATIC_PREFIXES = ['/oferta-educativa/'];
+const CINEMATIC_EXACT_ROUTES = new Set([
+  '/',
+  '/laboratorios',
+  '/nosotros',
+  '/docentes',
+  '/normateca',
+  '/comunidad',
+  '/egresados',
+  '/noticias',
+  '/especialidades',
+]);
+const CINEMATIC_PREFIXES = ['/oferta-educativa/', '/comunidad/'];
 
 function isCinematicRoute(pathname: string): boolean {
   return CINEMATIC_EXACT_ROUTES.has(pathname) || CINEMATIC_PREFIXES.some((p) => pathname.startsWith(p));
@@ -56,13 +66,14 @@ export default function Header() {
         }`}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link
-            to="/"
-            className={`font-mono text-sm font-bold uppercase tracking-widest ${
-              tone === 'light' ? 'text-surface' : 'text-ink'
-            }`}
-          >
-            DSC · ITM
+          <Link to="/" aria-label="Ir al inicio">
+            <img
+              src="/logos/dsc-logo.png"
+              alt="Departamento de Sistemas y Computación"
+              className={`h-9 w-auto transition-[filter] duration-300 ${
+                tone === 'light' ? 'brightness-0 invert' : ''
+              }`}
+            />
           </Link>
 
           <MegaMenu tone={tone} />
