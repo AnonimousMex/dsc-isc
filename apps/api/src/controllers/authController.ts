@@ -1,5 +1,11 @@
 import type { Request, Response } from 'express';
-import { changePasswordSchema, loginSchema, totpConfirmSchema } from '@dsc-isc/shared';
+import {
+  changePasswordSchema,
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+  totpConfirmSchema,
+} from '@dsc-isc/shared';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { clearSessionCookies, setSessionCookies } from '../lib/cookies.js';
 import { prisma } from '../lib/prisma.js';
@@ -61,5 +67,18 @@ export const postChangePassword = asyncHandler(async (req: Request, res: Respons
   const input = changePasswordSchema.parse(req.body);
   await authService.changePassword(req.user!.id, input.currentPassword, input.newPassword);
   clearSessionCookies(res);
+  res.status(204).send();
+});
+
+export const postForgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const input = forgotPasswordSchema.parse(req.body);
+  await authService.requestPasswordReset(input.email);
+  // Mensaje genérico a propósito: no revela si el correo existe (sección 9).
+  res.json({ message: 'Si el correo existe, se envió un código de recuperación.' });
+});
+
+export const postResetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const input = resetPasswordSchema.parse(req.body);
+  await authService.resetPasswordWithCode(input.email, input.code, input.newPassword);
   res.status(204).send();
 });

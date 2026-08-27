@@ -54,7 +54,7 @@ export default function AdminLayout() {
     <div className="flex min-h-svh">
       <aside className="flex w-64 shrink-0 flex-col border-r border-line bg-surface">
         <div className="px-5 py-6">
-          <p className="font-mono text-sm font-bold uppercase tracking-widest text-ink">Sistema DSC</p>
+          <img src="/logos/dsc-logo.png" alt="Departamento de Sistemas y Computación" className="h-9 w-auto" />
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3">
           {NAV_ITEMS.filter((item) => !item.roles || (user && item.roles.includes(user.role))).map(

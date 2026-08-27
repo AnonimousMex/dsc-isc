@@ -25,6 +25,7 @@ export default function CircuitBoard({ subjects, teachersById }: CircuitBoardPro
   const containerRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef(new Map<string, HTMLButtonElement>());
   const [positions, setPositions] = useState<Record<string, Point>>({});
+  const [contentSize, setContentSize] = useState({ width: 0, height: 0 });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -62,6 +63,13 @@ export default function CircuitBoard({ subjects, teachersById }: CircuitBoardPro
         };
       });
       setPositions(next);
+      // El <svg> vive dentro de un contenedor con scroll horizontal: si se
+      // deja en width:100% (el ancho VISIBLE del contenedor), cualquier
+      // línea hacia un nodo más allá de ese ancho queda recortada, porque
+      // un <svg> recorta por defecto todo lo que se sale de su propia caja.
+      // Hay que medir el ancho real del contenido (scrollWidth), no el del
+      // viewport, para que el svg cubra toda el área con scroll.
+      setContentSize({ width: container.scrollWidth, height: container.scrollHeight });
     };
 
     measure();
@@ -92,7 +100,11 @@ export default function CircuitBoard({ subjects, teachersById }: CircuitBoardPro
   return (
     <div>
       <div ref={containerRef} className="relative overflow-x-auto pb-4">
-        <svg className="pointer-events-none absolute left-0 top-0 h-full" style={{ width: '100%' }} aria-hidden="true">
+        <svg
+          className="pointer-events-none absolute left-0 top-0"
+          style={{ width: contentSize.width || '100%', height: contentSize.height || '100%', overflow: 'visible' }}
+          aria-hidden="true"
+        >
           {prerequisiteEdges.map((edge) => {
             const from = positions[edge.from];
             const to = positions[edge.to];

@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { ApiError } from '../lib/apiClient';
+import { apiPost, ApiError } from '../lib/apiClient';
 import { useAuth } from '../lib/AuthContext';
 
-type Step = 'credentials' | 'totp-required' | 'totp-setup';
+type Step = 'credentials' | 'totp-required' | 'totp-setup' | 'forgot-request' | 'forgot-reset';
 
 export default function Login() {
   const { login, confirmTotpSetup } = useAuth();
@@ -20,6 +20,9 @@ export default function Login() {
   const [otpauthUrl, setOtpauthUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [info, setInfo] = useState<string | null>(null);
 
   const secretFromUrl = (() => {
     try {
@@ -85,11 +88,48 @@ export default function Login() {
     }
   };
 
+  const handleForgotRequestSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await apiPost('/auth/forgot-password', { email });
+      setInfo('Si el correo existe, se envió un código de recuperación. Revisa tu bandeja de entrada.');
+      setStep('forgot-reset');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo enviar el código');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleForgotResetSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await apiPost('/auth/reset-password', { email, code: resetCode, newPassword });
+      setInfo('Contraseña actualizada. Ya puedes iniciar sesión con ella.');
+      setPassword('');
+      setResetCode('');
+      setNewPassword('');
+      setStep('credentials');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo actualizar la contraseña');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex min-h-svh items-center justify-center bg-elevated px-4">
       <div className="w-full max-w-sm rounded-lg border border-line bg-surface p-8 shadow-sm">
-        <p className="font-mono text-xs uppercase tracking-widest text-primary">Sistema DSC</p>
-        <h1 className="mt-2 text-xl font-bold text-ink">Iniciar sesión</h1>
+        <img src="/logos/dsc-logo.png" alt="Departamento de Sistemas y Computación" className="h-10 w-auto" />
+        <h1 className="mt-4 text-xl font-bold text-ink">Iniciar sesión</h1>
+
+        {info && (step === 'credentials' || step === 'forgot-request' || step === 'forgot-reset') && (
+          <p className="mt-4 text-sm text-primary">{info}</p>
+        )}
 
         {step === 'credentials' && (
           <form className="mt-6 flex flex-col gap-4" onSubmit={handleCredentialsSubmit}>
@@ -123,6 +163,105 @@ export default function Login() {
             <Button type="submit" disabled={submitting}>
               {submitting ? 'Entrando…' : 'Entrar'}
             </Button>
+            <button
+              type="button"
+              className="text-sm text-muted underline underline-offset-4 hover:text-primary"
+              onClick={() => {
+                setError(null);
+                setInfo(null);
+                setStep('forgot-request');
+              }}
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </form>
+        )}
+
+        {step === 'forgot-request' && (
+          <form className="mt-6 flex flex-col gap-4" onSubmit={handleForgotRequestSubmit}>
+            <p className="text-sm text-muted">
+              Escribe tu correo y te enviaremos un código de recuperación de 6 dígitos, válido por 15
+              minutos.
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="forgot-email">Correo</Label>
+              <Input
+                id="forgot-email"
+                type="email"
+                required
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            {error && (
+              <p role="alert" aria-live="assertive" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Enviando…' : 'Enviar código'}
+            </Button>
+            <button
+              type="button"
+              className="text-sm text-muted underline underline-offset-4 hover:text-primary"
+              onClick={() => {
+                setError(null);
+                setInfo(null);
+                setStep('credentials');
+              }}
+            >
+              Volver a iniciar sesión
+            </button>
+          </form>
+        )}
+
+        {step === 'forgot-reset' && (
+          <form className="mt-6 flex flex-col gap-4" onSubmit={handleForgotResetSubmit}>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="reset-code">Código de recuperación</Label>
+              <Input
+                id="reset-code"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                autoFocus
+                value={resetCode}
+                onChange={(e) => setResetCode(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="new-password">Nueva contraseña</Label>
+              <Input
+                id="new-password"
+                type="password"
+                required
+                minLength={12}
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            {error && (
+              <p role="alert" aria-live="assertive" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Guardando…' : 'Cambiar contraseña'}
+            </Button>
+            <button
+              type="button"
+              className="text-sm text-muted underline underline-offset-4 hover:text-primary"
+              onClick={() => {
+                setError(null);
+                setInfo(null);
+                setStep('forgot-request');
+              }}
+            >
+              Pedir un código nuevo
+            </button>
           </form>
         )}
 

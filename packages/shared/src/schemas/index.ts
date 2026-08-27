@@ -67,6 +67,16 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(12, 'Mínimo 12 caracteres'),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6),
+  newPassword: z.string().min(12, 'Mínimo 12 caracteres'),
+});
+
 export const userCreateSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),

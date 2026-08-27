@@ -1,20 +1,14 @@
-// Ver README.md → "Migrar a Postgres/S3" para los 2 pasos de migración.
-// Nota: donde en Postgres usaríamos el tipo `Json`, aquí usamos `String` con
-// JSON serializado a mano (JSON.stringify/JSON.parse en src/services/) —
-// es la forma correcta de trabajar con SQLite en Prisma y permite que ese
-// mismo campo pase a `Json` nativo sin rediseñar el resto del modelo.
-//
-// Nota sobre enums: el conector de SQLite de Prisma NO soporta `enum`
-// nativo (a diferencia de Postgres/MySQL). Los campos que en el documento
-// de producto se describen como enum (Role, MediaKind, SourceType) se
-// modelan aquí como `String` y se validan con los union types de
-// packages/shared (`Role`, `MediaKind`, `SourceType`) y los esquemas Zod
-// correspondientes en cada servicio antes de escribir a la base de datos.
-// Al migrar a Postgres esto puede volver a un `enum` nativo sin tocar el
-// resto del modelo.
+// Migrado de SQLite a Postgres (Supabase) — ver README.md → "Migrar a
+// Postgres/S3". Los campos que en el documento de producto son enum (Role,
+// MediaKind, SourceType) se dejan como `String`, validados con los union
+// types de packages/shared y los esquemas Zod de cada servicio antes de
+// escribir a la base: funcionaban así por la limitación de SQLite (que no
+// soporta `enum` nativo) y no hace falta tocarlos para que sigan
+// funcionando en Postgres — convertirlos a `enum` nativo queda como mejora
+// opcional, no bloquea la migración.
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -33,6 +27,11 @@ model User {
   mustChangePassword Boolean @default(false)
   failedLoginAttempts Int    @default(0)
   lockedUntil  DateTime?
+  // Recuperación de contraseña por correo: se guarda el hash del código (no
+  // el código en sí, igual que la contraseña) y su expiración. Un solo
+  // código pendiente a la vez — pedir uno nuevo invalida el anterior.
+  passwordResetCodeHash String?
+  passwordResetExpiresAt DateTime?
   createdAt    DateTime   @default(now())
   auditLogs    AuditLog[]
   refreshTokens RefreshToken[]

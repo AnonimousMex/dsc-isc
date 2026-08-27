@@ -32,6 +32,11 @@ export class S3StorageAdapter implements StorageAdapter {
     this.client = new S3Client({
       region,
       endpoint: process.env.S3_ENDPOINT || undefined,
+      // Requerido por proveedores S3-compatibles que no son AWS (Supabase
+      // Storage, Cloudflare R2, Backblaze B2): no soportan el direccionamiento
+      // "virtual-hosted-style" (bucket.endpoint.com) que el SDK usa por
+      // defecto, solo "path-style" (endpoint.com/bucket/...).
+      forcePathStyle: true,
       credentials:
         process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
           ? {

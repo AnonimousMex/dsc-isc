@@ -1,8 +1,12 @@
+import { lazy } from 'react';
 import InteractiveTimeline from '../components/timeline/InteractiveTimeline';
 import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
+import SectionHero3D from '../components/shared/SectionHero3D';
 import { api, siteConfigValue } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
+
+const TimelineHelix = lazy(() => import('../components/three/TimelineHelix'));
 
 export default function Nosotros() {
   const { data: timeline } = useApiData(() => api.timeline(), []);
@@ -11,25 +15,44 @@ export default function Nosotros() {
   const mission = config ? siteConfigValue<string>(config, 'nosotros.mision') : undefined;
   const vision = config ? siteConfigValue<string>(config, 'nosotros.vision') : undefined;
   const values = config ? siteConfigValue<string[]>(config, 'nosotros.valores') : undefined;
+  const heroImageUrl = config ? siteConfigValue<string>(config, 'nosotros.heroImageUrl') : undefined;
 
   return (
     <div>
-      <section className="mx-auto max-w-4xl px-6 py-24">
-        <Reveal>
-          <SectionEyebrow>Nosotros</SectionEyebrow>
-          <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">Historia y valores</h1>
-          <p className="mt-4 max-w-2xl text-muted">
-            Desde 1988, el Departamento de Sistemas y Computación forma ingenieros e informáticos
-            para la industria y la investigación aplicada.
-          </p>
-        </Reveal>
+      <SectionHero3D
+        eyebrow="Nosotros"
+        title="Historia y valores"
+        description="Desde 1988, el Departamento de Sistemas y Computación forma ingenieros e informáticos para la industria y la investigación aplicada."
+        scene={TimelineHelix}
+      />
 
+      <section className="mx-auto max-w-4xl px-6 py-20">
         {timeline && timeline.length > 0 && (
-          <Reveal delayMs={100} className="mt-16">
+          <Reveal>
             <InteractiveTimeline events={timeline} />
           </Reveal>
         )}
       </section>
+
+      {heroImageUrl && (
+        <Reveal>
+          <section className="relative h-[50svh] min-h-[320px] overflow-hidden">
+            <img
+              src={heroImageUrl}
+              alt="Instalaciones del Departamento de Sistemas y Computación"
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-deep/80 via-deep/10 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-8">
+              <p className="font-mono text-xs uppercase tracking-widest text-signal">Desde 1988</p>
+              <p className="mt-2 max-w-md text-lg font-bold text-surface">
+                Más de tres décadas formando ingenieros e informáticos.
+              </p>
+            </div>
+          </section>
+        </Reveal>
+      )}
 
       <section className="border-t border-line bg-elevated px-6 py-24">
         <div className="mx-auto max-w-5xl">

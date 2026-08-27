@@ -14,4 +14,14 @@ export const env = {
   jwtSecret: required('JWT_SECRET'),
   jwtRefreshSecret: required('JWT_REFRESH_SECRET'),
   storageDriver: process.env.STORAGE_DRIVER ?? 'local',
+  // Origen público desde el que se sirven /uploads (ver LocalDiskStorageAdapter).
+  // En producción, apuntar al dominio público real de la API.
+  apiPublicUrl: (process.env.API_PUBLIC_URL ?? `http://localhost:${process.env.PORT ?? 4000}`).replace(/\/$/, ''),
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 465),
+    user: process.env.SMTP_USER,
+    password: process.env.SMTP_PASSWORD,
+    from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
+  },
 };
