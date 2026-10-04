@@ -11,7 +11,6 @@ const CINEMATIC_EXACT_ROUTES = new Set([
   '/',
   '/laboratorios',
   '/nosotros',
-  '/docentes',
   '/normateca',
   '/comunidad',
   '/egresados',
