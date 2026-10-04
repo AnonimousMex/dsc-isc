@@ -34,15 +34,15 @@ function Helix() {
 
   return (
     <group ref={groupRef}>
-      <Line points={strandA} color="#8DC63F" lineWidth={1.5} />
-      <Line points={strandB} color="#8DC63F" lineWidth={1.5} />
+      <Line points={strandA} color="#5AA9E6" lineWidth={1.5} />
+      <Line points={strandB} color="#5AA9E6" lineWidth={1.5} />
       {rungs.map((rung, i) => (
-        <Line key={i} points={rung} color="#3f6b46" transparent opacity={0.7} lineWidth={1} />
+        <Line key={i} points={rung} color="#2E4F73" transparent opacity={0.7} lineWidth={1} />
       ))}
       {[...strandA, ...strandB].map((point, i) => (
         <mesh key={i} position={point}>
           <sphereGeometry args={[0.045, 10, 10]} />
-          <meshStandardMaterial color="#C9F0A0" emissive="#8DC63F" emissiveIntensity={0.7} />
+          <meshStandardMaterial color="#BFDCF7" emissive="#5AA9E6" emissiveIntensity={0.7} />
         </mesh>
       ))}
     </group>

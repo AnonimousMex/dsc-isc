@@ -4,3 +4,4 @@ export * from './graph/prerequisites';
 export * from './avatar';
 export * from './imageUrl';
 export * from './youtube';
+export * from './theme';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ZodError } from 'zod';
-import { heroSlideSchema, type HeroSlide, type SiteConfig } from '@dsc-isc/shared';
+import { applyThemeFromConfig, heroSlideSchema, THEME_COLOR_KEYS, type HeroSlide, type SiteConfig } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
@@ -12,6 +12,23 @@ import { Label } from '../components/ui/label';
 import { apiDelete, apiGet, apiPost, apiPut, ApiError } from '../lib/apiClient';
 
 const emptyForm = { order: 0, media: null as MediaValue | null, captionCode: '', isActive: true };
+
+// Mismos valores por defecto que trae el preset de Tailwind (ver
+// tailwind-preset.ts) — así, antes de que el admin guarde nada, los
+// campos de color muestran lo que el sitio ya está usando, no un blanco.
+const DEFAULT_THEME_COLORS = {
+  primary: '#2A5394',
+  accent: '#163A72',
+  signal: '#5AA9E6',
+  deep: '#0B1A33',
+};
+
+const THEME_COLOR_FIELDS: Array<{ key: keyof typeof THEME_COLOR_KEYS; label: string; hint: string }> = [
+  { key: 'primary', label: 'Primario', hint: 'Botones, enlaces activos, acentos principales.' },
+  { key: 'accent', label: 'Acento', hint: 'Hover de botones, elementos activos en admin.' },
+  { key: 'signal', label: 'Señal', hint: 'Resaltados interactivos: hover de retícula, foco de teclado.' },
+  { key: 'deep', label: 'Oscuro', hint: 'Fondo de tramos cinematográficos (hero, oferta educativa).' },
+];
 
 function configValue<T>(config: SiteConfig[], key: string): T | undefined {
   return config.find((c) => c.key === key)?.value as T | undefined;
@@ -31,6 +48,10 @@ export default function Configuracion() {
   const [savingConfig, setSavingConfig] = useState(false);
   const [configSaved, setConfigSaved] = useState(false);
 
+  const [themeColors, setThemeColors] = useState(DEFAULT_THEME_COLORS);
+  const [savingTheme, setSavingTheme] = useState(false);
+  const [themeSaved, setThemeSaved] = useState(false);
+
   const load = async () => {
     setLoading(true);
     const [slideList, configList] = await Promise.all([
@@ -40,6 +61,12 @@ export default function Configuracion() {
     setSlides(slideList);
     setTitulacion(configValue<string>(configList, 'egresados.titulacion') ?? '');
     setTitulosRecibidos(configValue<string>(configList, 'egresados.titulosRecibidos') ?? '');
+    setThemeColors({
+      primary: configValue<string>(configList, THEME_COLOR_KEYS.primary) ?? DEFAULT_THEME_COLORS.primary,
+      accent: configValue<string>(configList, THEME_COLOR_KEYS.accent) ?? DEFAULT_THEME_COLORS.accent,
+      signal: configValue<string>(configList, THEME_COLOR_KEYS.signal) ?? DEFAULT_THEME_COLORS.signal,
+      deep: configValue<string>(configList, THEME_COLOR_KEYS.deep) ?? DEFAULT_THEME_COLORS.deep,
+    });
     setLoading(false);
   };
 
@@ -97,6 +124,28 @@ export default function Configuracion() {
     }
   };
 
+  const saveTheme = async () => {
+    setSavingTheme(true);
+    setThemeSaved(false);
+    try {
+      await Promise.all(
+        THEME_COLOR_FIELDS.map(({ key }) => apiPut(`/site-config/${THEME_COLOR_KEYS[key]}`, { value: themeColors[key] })),
+      );
+      // Se aplica de inmediato en este mismo tab — sin esto, solo se vería
+      // el cambio tras recargar (el próximo fetch de ThemeLoader).
+      applyThemeFromConfig(
+        THEME_COLOR_FIELDS.map(({ key }) => ({
+          key: THEME_COLOR_KEYS[key],
+          value: themeColors[key],
+          updatedAt: new Date().toISOString(),
+        })),
+      );
+      setThemeSaved(true);
+    } finally {
+      setSavingTheme(false);
+    }
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-ink">Configuración</h1>
@@ -131,6 +180,47 @@ export default function Configuracion() {
           )}
         />
       </div>
+
+      <Card className="mt-10">
+        <CardHeader>
+          <CardTitle>Apariencia</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-sm text-muted">
+            Los colores de marca del sitio público y de este panel. Un cambio aquí se ve en todo el sitio sin
+            necesidad de tocar código.
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {THEME_COLOR_FIELDS.map(({ key, label, hint }) => (
+              <div key={key} className="flex flex-col gap-1.5">
+                <Label htmlFor={`theme-${key}`}>{label}</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    aria-label={`Color ${label}`}
+                    value={themeColors[key]}
+                    onChange={(e) => setThemeColors({ ...themeColors, [key]: e.target.value })}
+                    className="h-9 w-9 shrink-0 cursor-pointer rounded border border-line bg-transparent p-0.5"
+                  />
+                  <Input
+                    id={`theme-${key}`}
+                    value={themeColors[key]}
+                    onChange={(e) => setThemeColors({ ...themeColors, [key]: e.target.value })}
+                    className="font-mono text-xs"
+                  />
+                </div>
+                <p className="text-xs text-muted">{hint}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <Button onClick={saveTheme} disabled={savingTheme}>
+              {savingTheme ? 'Guardando…' : 'Guardar colores'}
+            </Button>
+            {themeSaved && <span className="text-sm text-green-700">Guardado — ya se ve reflejado.</span>}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="mt-10">
         <CardHeader>

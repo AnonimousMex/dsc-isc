@@ -29,12 +29,12 @@ function Waves() {
           rotation={[Math.PI / 2, 0, 0]}
         >
           <torusGeometry args={[1, 0.02, 8, 64]} />
-          <meshStandardMaterial color="#8DC63F" emissive="#8DC63F" emissiveIntensity={0.6} transparent opacity={1} />
+          <meshStandardMaterial color="#5AA9E6" emissive="#5AA9E6" emissiveIntensity={0.6} transparent opacity={1} />
         </mesh>
       ))}
       <mesh>
         <sphereGeometry args={[0.18, 16, 16]} />
-        <meshStandardMaterial color="#F4F6F2" emissive="#8DC63F" emissiveIntensity={0.4} />
+        <meshStandardMaterial color="#F4F6F2" emissive="#5AA9E6" emissiveIntensity={0.4} />
       </mesh>
     </>
   );

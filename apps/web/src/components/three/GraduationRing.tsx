@@ -43,13 +43,13 @@ function Scene() {
     <>
       <mesh ref={ring} rotation={[0.5, 0.3, 0]}>
         <torusGeometry args={[1.4, 0.05, 16, 64]} />
-        <meshStandardMaterial color="#8DC63F" emissive="#8DC63F" emissiveIntensity={0.5} />
+        <meshStandardMaterial color="#5AA9E6" emissive="#5AA9E6" emissiveIntensity={0.5} />
       </mesh>
       <group ref={risers}>
         {items.map((_, i) => (
           <mesh key={i}>
             <sphereGeometry args={[0.035, 8, 8]} />
-            <meshStandardMaterial color="#F4F6F2" emissive="#8DC63F" emissiveIntensity={0.6} />
+            <meshStandardMaterial color="#F4F6F2" emissive="#5AA9E6" emissiveIntensity={0.6} />
           </mesh>
         ))}
       </group>

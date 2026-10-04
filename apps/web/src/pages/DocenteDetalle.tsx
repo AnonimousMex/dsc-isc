@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Facebook, Globe, Linkedin, Mail, Play, Twitter } from 'lucide-react';
+import TeacherArticlesSection from '../components/docentes/TeacherArticlesSection';
 import TeacherAvatar from '../components/docentes/TeacherAvatar';
 import VideoModal from '../components/docentes/VideoModal';
 import Reveal from '../components/shared/Reveal';
@@ -101,6 +102,8 @@ export default function DocenteDetalle() {
           </div>
         </Reveal>
       )}
+
+      <TeacherArticlesSection slug={teacher.slug} hasOpenAlexLink={Boolean(teacher.openAlexId)} />
 
       {videoOpen && teacher.youtubeUrl && (
         <VideoModal

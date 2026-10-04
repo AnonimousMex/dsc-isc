@@ -46,7 +46,7 @@ function Badges() {
       {items.map((item, i) => (
         <mesh key={i} position={item.base}>
           <boxGeometry args={[0.34, 0.44, 0.03]} />
-          <meshStandardMaterial color="#123821" emissive="#8DC63F" emissiveIntensity={0.35} />
+          <meshStandardMaterial color="#13233F" emissive="#5AA9E6" emissiveIntensity={0.35} />
         </mesh>
       ))}
     </group>

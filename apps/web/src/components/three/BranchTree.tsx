@@ -19,15 +19,15 @@ function Tree() {
 
   return (
     <group ref={groupRef}>
-      <Line points={[trunkBase, trunkTop]} color="#8DC63F" lineWidth={2} />
+      <Line points={[trunkBase, trunkTop]} color="#5AA9E6" lineWidth={2} />
       {BRANCH_ANGLES.map((angle, i) => {
         const end: Point3 = [Math.sin(angle) * 1.5, 1.4, Math.cos(angle) * 0.4];
         return (
           <group key={i}>
-            <Line points={[trunkTop, end]} color="#8DC63F" lineWidth={2} />
+            <Line points={[trunkTop, end]} color="#5AA9E6" lineWidth={2} />
             <mesh position={end}>
               <sphereGeometry args={[0.14, 16, 16]} />
-              <meshStandardMaterial color="#C9F0A0" emissive="#8DC63F" emissiveIntensity={0.6} />
+              <meshStandardMaterial color="#BFDCF7" emissive="#5AA9E6" emissiveIntensity={0.6} />
             </mesh>
           </group>
         );

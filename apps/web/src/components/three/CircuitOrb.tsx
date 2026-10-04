@@ -52,11 +52,11 @@ function Network() {
       {points.map((point, i) => (
         <mesh key={i} position={point}>
           <sphereGeometry args={[0.035, 8, 8]} />
-          <meshStandardMaterial color="#8DC63F" emissive="#8DC63F" emissiveIntensity={1.4} />
+          <meshStandardMaterial color="#5AA9E6" emissive="#5AA9E6" emissiveIntensity={1.4} />
         </mesh>
       ))}
       {edges.map(([a, b], i) => (
-        <Line key={i} points={[a, b]} color="#3f6b46" transparent opacity={0.55} lineWidth={1} />
+        <Line key={i} points={[a, b]} color="#2E4F73" transparent opacity={0.55} lineWidth={1} />
       ))}
     </group>
   );

@@ -165,6 +165,11 @@ model Teacher {
   linkedin   String?
   facebook   String?
   twitter    String?
+  // ID de autor en OpenAlex (ej. "A5017972615"), capturado a mano desde el
+  // admin tras desambiguar homónimos — nunca se resuelve por nombre en
+  // caliente (ver openAlexService.ts), porque un nombre no identifica de
+  // forma única a un investigador.
+  openAlexId String?
   isActive   Boolean          @default(true)
   subjects   TeacherSubject[]
 }

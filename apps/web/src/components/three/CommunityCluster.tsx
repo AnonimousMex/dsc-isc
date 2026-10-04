@@ -45,7 +45,7 @@ function Cluster() {
       {items.map((item, i) => (
         <mesh key={i}>
           <sphereGeometry args={[item.size, 10, 10]} />
-          <meshStandardMaterial color="#8DC63F" emissive="#3f6b46" emissiveIntensity={0.6} />
+          <meshStandardMaterial color="#5AA9E6" emissive="#2E4F73" emissiveIntensity={0.6} />
         </mesh>
       ))}
     </group>
