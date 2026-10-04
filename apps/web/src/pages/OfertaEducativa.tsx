@@ -1,11 +1,13 @@
-import { useMemo } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import type { TeacherSummary } from '@dsc-isc/shared';
+import { toYoutubeEmbedUrl, type TeacherSummary } from '@dsc-isc/shared';
 import CircuitBoard from '../components/reticula/CircuitBoard';
 import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
 import { api } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
+
+const CircuitOrb = lazy(() => import('../components/three/CircuitOrb'));
 
 export default function OfertaEducativa() {
   const { programSlug = '' } = useParams<{ programSlug: string }>();
@@ -14,6 +16,11 @@ export default function OfertaEducativa() {
     program?.id,
   ]);
   const { data: teachers } = useApiData(() => api.teachers(), []);
+  const [showOrb, setShowOrb] = useState(false);
+
+  useEffect(() => {
+    setShowOrb(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
 
   const teachersById = useMemo(() => {
     const map: Record<string, TeacherSummary> = {};
@@ -40,8 +47,20 @@ export default function OfertaEducativa() {
 
   return (
     <div>
-      <section className="flex min-h-[60svh] flex-col items-center justify-center bg-deep px-6 py-24 text-center text-surface">
-        <Reveal>
+      <section className="relative flex min-h-[60svh] flex-col items-center justify-center overflow-hidden bg-deep px-6 py-24 text-center text-surface">
+        {showOrb && (
+          <div className="absolute inset-0 opacity-60">
+            <Suspense fallback={null}>
+              <CircuitOrb />
+            </Suspense>
+          </div>
+        )}
+        <Reveal className="relative">
+          {program.slug === 'isc' && (
+            <div className="mx-auto mb-6 inline-flex rounded-lg bg-surface px-5 py-3">
+              <img src="/logos/isc-logo.png" alt="Logo de ISC" className="h-10 w-auto" />
+            </div>
+          )}
           <SectionEyebrow tone="light">Oferta educativa</SectionEyebrow>
           <h1 className="mt-3 max-w-3xl text-3xl font-bold sm:text-5xl">{program.name}</h1>
         </Reveal>
@@ -53,7 +72,7 @@ export default function OfertaEducativa() {
           {program.videoUrl ? (
             <div className="mt-4 aspect-video overflow-hidden rounded-lg bg-elevated">
               <iframe
-                src={program.videoUrl}
+                src={toYoutubeEmbedUrl(program.videoUrl)}
                 title={`Video institucional de ${program.name}`}
                 className="h-full w-full"
                 loading="lazy"

@@ -9,6 +9,7 @@ import DocenteDetalle from './pages/DocenteDetalle';
 import Laboratorios from './pages/Laboratorios';
 import LaboratorioDetalle from './pages/LaboratorioDetalle';
 import Especialidades from './pages/Especialidades';
+import EspecialidadDetalle from './pages/EspecialidadDetalle';
 import Normateca from './pages/Normateca';
 import Comunidad from './pages/Comunidad';
 import Egresados from './pages/Egresados';
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: 'nosotros', element: <Nosotros /> },
       { path: 'oferta-educativa/:programSlug', element: <OfertaEducativa /> },
       { path: 'especialidades', element: <Especialidades /> },
+      { path: 'especialidades/:slug', element: <EspecialidadDetalle /> },
       { path: 'docentes', element: <Docentes /> },
       { path: 'docentes/:slug', element: <DocenteDetalle /> },
       { path: 'laboratorios', element: <Laboratorios /> },

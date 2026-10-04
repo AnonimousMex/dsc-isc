@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { toYoutubeEmbedUrl } from '@dsc-isc/shared';
 
 interface VideoModalProps {
   youtubeUrl: string;
@@ -38,7 +39,7 @@ export default function VideoModal({ youtubeUrl, title, onClose }: VideoModalPro
           onClick={(event) => event.stopPropagation()}
         >
           <iframe
-            src={youtubeUrl}
+            src={toYoutubeEmbedUrl(youtubeUrl)}
             title={title}
             className="h-full w-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

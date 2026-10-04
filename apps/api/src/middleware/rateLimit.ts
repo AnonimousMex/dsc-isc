@@ -13,6 +13,18 @@ export const loginRateLimiter = rateLimit({
   message: { error: 'Demasiados intentos. Intenta de nuevo más tarde.' },
 });
 
+/**
+ * Límite sobre los endpoints de recuperación de contraseña por correo — más
+ * estricto que el login porque además cuestan un envío de correo real.
+ */
+export const passwordResetRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo más tarde.' },
+});
+
 /** Límite general para endpoints públicos de escritura (ej. contacto, si se agregan). */
 export const writeRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

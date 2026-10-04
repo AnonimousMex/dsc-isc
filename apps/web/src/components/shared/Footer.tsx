@@ -6,11 +6,15 @@ export default function Footer() {
     <footer className="border-t border-line bg-elevated">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="font-mono text-sm font-bold uppercase tracking-widest text-ink">DSC · ITM</p>
+          <img src="/logos/dsc-logo.png" alt="Departamento de Sistemas y Computación" className="h-10 w-auto" />
           <p className="mt-3 max-w-xs text-sm text-muted">
             Departamento de Sistemas y Computación. Rediseño propio, no es el sitio oficial del
             Instituto Tecnológico de Morelia.
           </p>
+          <div className="mt-5 flex items-center gap-5">
+            <img src="/logos/itm-logo.jpeg" alt="Instituto Tecnológico de Morelia" className="h-14 w-auto" />
+            <img src="/logos/isc-logo.png" alt="Ingeniería en Sistemas Computacionales" className="h-14 w-auto" />
+          </div>
         </div>
 
         {navGroups.map((group) => (

@@ -67,6 +67,16 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(12, 'Mínimo 12 caracteres'),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6),
+  newPassword: z.string().min(12, 'Mínimo 12 caracteres'),
+});
+
 export const userCreateSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
@@ -90,6 +100,16 @@ export const teacherSchema = z.object({
   linkedin: urlSchema.nullable().optional().or(z.literal('')),
   facebook: urlSchema.nullable().optional().or(z.literal('')),
   twitter: urlSchema.nullable().optional().or(z.literal('')),
+  // ID de autor en OpenAlex (https://openalex.org), ej. "A5017972615" — se
+  // captura a mano tras desambiguar homónimos, nunca se resuelve por nombre
+  // en automático (ver services/openAlexService.ts en apps/api).
+  openAlexId: z
+    .string()
+    .trim()
+    .regex(/^A\d{6,}$/, 'Debe ser un OpenAlex ID válido (ej. A5017972615)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
   isActive: z.boolean().default(true),
   subjectIds: z.array(z.string()).default([]),
 });

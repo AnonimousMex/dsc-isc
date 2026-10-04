@@ -665,8 +665,48 @@ sustituirse por contenido real desde el sistema antes de publicar el sitio.
 | Specialty (x3) | image | Fotos de stock de Unsplash | ✅ Pendiente — reemplazar por imagen representativa real |
 | News (x2) | title/excerpt/body | Artículos de ejemplo explícitamente marcados como "contenido de ejemplo" en el propio `body` | ✅ Pendiente — reemplazar por noticias reales del departamento |
 | News (x2) | coverImage | Fotos de stock de Unsplash | ✅ Pendiente — reemplazar por imagen real de cada noticia |
-| Document (normateca) | — | Sin seed — la sección arranca vacía | ✅ Pendiente — cargar reglamentos/formatos reales desde el sistema |
-| CommunitySection | — | Sin seed — la sección arranca vacía | ✅ Pendiente — cargar contenido real de Residencias/Investigación/Créditos |
+| Document (normateca) (x3) | title/category | "Reglamento de Laboratorios", "Formato de Registro de Residencia Profesional", "Normativa de Créditos Complementarios" — títulos genéricos, no se inventó texto de reglamento real | ✅ Pendiente — reemplazar por los documentos oficiales reales |
+| Document (normateca) (x3) | media | Las 3 apuntan al mismo PDF de relleno público (`w3.org`, un archivo de prueba conocido), a propósito para no fabricar contenido regulatorio falso | ✅ Pendiente — subir el PDF real de cada documento |
+| CommunitySection (x3) | title/body | Residencias Profesionales / Investigación / Créditos Complementarios — descripción genérica de qué es cada cosa, sin inventar fechas, formularios o procedimientos específicos | ✅ Pendiente — ampliar con el proceso real de cada una |
 | SiteConfig | `nosotros.mision` / `nosotros.vision` / `nosotros.valores` | Redactado por el equipo de construcción, contenido plausible pero no oficial | ✅ Pendiente — validar con el departamento |
-| SiteConfig | `egresados.titulacion` / `egresados.titulosRecibidos` | Sin seed — la página muestra un estado vacío | ✅ Pendiente — cargar el proceso real de titulación desde el sistema |
-| User SUPERADMIN | password | Generada aleatoriamente en cada corrida de `seed.ts`, impresa una sola vez en consola, con `mustChangePassword: true` | ✅ Pendiente — cambiarla en el primer login (obligatorio) |
+| SiteConfig | `egresados.titulacion` / `egresados.titulosRecibidos` | Descripción genérica del proceso de titulación, redactada por el equipo de construcción, no un procedimiento oficial con fechas/formatos reales | ✅ Pendiente — validar con el departamento |
+| User SUPERADMIN | password | Fija (`DSC-ISC-Morelia-2026`), reseteada manualmente en la BD de `dev` — ver nota debajo | ✅ Resuelto |
+
+> **Nota (rama `dev`, base de datos Supabase compartida):** Normateca,
+> Comunidad y Egresados se rellenaron directo en la base de datos real de
+> Supabase (no vía `seed.ts`, que en esta rama ya no siembra estos tres) a
+> petición explícita para que el sitio no se viera vacío en una demo. Se
+> mantuvo la misma regla de las fases anteriores: nunca inventar texto que
+> suene a reglamento, trámite o fecha oficial específica — solo
+> descripciones genéricas de qué es cada sección, y para Normateca un PDF
+> de relleno público en vez de fabricar el contenido de un reglamento real.
+
+> **Nota (rama `dev`): recuperación de contraseña por correo.** El
+> `SUPERADMIN` inicial nace con una contraseña aleatoria que solo se imprime
+> una vez en consola al correr `seed.ts` — en la práctica, imposible de
+> recuperar si se olvida (es un hash bcrypt, no reversible). A petición
+> explícita se resolvió de dos formas: (1) se fijó una contraseña conocida
+> (`DSC-ISC-Morelia-2026`) y se cambió el correo del SUPERADMIN de
+> `admin@dsc.local` (dominio falso, sin bandeja real) a
+> `appprueba695@gmail.com`, la cuenta que se seguirá usando en adelante como
+> correo fijo de recuperación; (2) se agregó un flujo real de "¿Olvidaste tu
+> contraseña?" (`POST /auth/forgot-password` + `POST /auth/reset-password`,
+> nuevos campos `User.passwordResetCodeHash`/`passwordResetExpiresAt`,
+> código de 6 dígitos con expiración de 15 min, un solo intento válido a la
+> vez, rate-limit dedicado) para no volver a depender de que alguien
+> recuerde o me pida resetearla a mano. El envío real requiere
+> `SMTP_PASSWORD` en `apps/api/.env` — una "contraseña de aplicación" de 16
+> caracteres generada en la cuenta de Gmail (Seguridad > Verificación en dos
+> pasos > Contraseñas de aplicaciones), **no** la contraseña normal de la
+> cuenta; sin ella, el código se registra en consola del servidor en vez de
+> enviarse, para no bloquear el desarrollo local.
+>
+> También: la migración que agrega esas dos columnas
+> (`20260827010000_add_password_reset_code`) se escribió a mano y se aplicó
+> con `prisma migrate deploy` en vez de `prisma migrate dev`, porque este
+> último necesita crear una shadow database para calcular el diff y eso
+> falla contra el connection pooler de Supabase en este entorno (error
+> P1014) — la misma familia de limitación de red/privilegios ya documentada
+> para las conexiones directas a Postgres. `migrate deploy` no necesita
+> shadow database, así que sigue siendo seguro para aplicar migraciones ya
+> escritas a mano contra la base compartida.

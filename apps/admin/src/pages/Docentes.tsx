@@ -5,6 +5,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import MultiSelect from '../components/MultiSelect';
+import OpenAlexLinkField from '../components/OpenAlexLinkField';
 import { Button } from '../components/ui/button';
 import {
   Dialog,
@@ -29,6 +30,7 @@ const emptyForm = {
   linkedin: '',
   facebook: '',
   twitter: '',
+  openAlexId: '',
   isActive: true,
   subjectIds: [] as string[],
 };
@@ -82,6 +84,7 @@ export default function Docentes() {
       linkedin: teacher.linkedin ?? '',
       facebook: teacher.facebook ?? '',
       twitter: teacher.twitter ?? '',
+      openAlexId: teacher.openAlexId ?? '',
       isActive: teacher.isActive,
       subjectIds: teacher.subjectIds,
     });
@@ -103,6 +106,7 @@ export default function Docentes() {
       linkedin: form.linkedin || null,
       facebook: form.facebook || null,
       twitter: form.twitter || null,
+      openAlexId: form.openAlexId || null,
       isActive: form.isActive,
       subjectIds: form.subjectIds,
     };
@@ -262,6 +266,12 @@ export default function Docentes() {
                 />
               </div>
             </div>
+
+            <OpenAlexLinkField
+              value={form.openAlexId}
+              onChange={(openAlexId) => setForm({ ...form, openAlexId })}
+              defaultQuery={form.fullName}
+            />
 
             <div>
               <p className="mb-2 text-sm font-medium text-ink">Materias que imparte</p>

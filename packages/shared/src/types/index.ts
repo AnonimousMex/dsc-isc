@@ -108,7 +108,31 @@ export interface Teacher extends TeacherSummary {
   linkedin: string | null;
   facebook: string | null;
   twitter: string | null;
+  openAlexId: string | null;
   subjectIds: string[];
+}
+
+/** Publicación recuperada en vivo desde OpenAlex para un docente enlazado. */
+export interface TeacherArticle {
+  id: string;
+  title: string;
+  year: number | null;
+  type: string;
+  venue: string | null;
+  doi: string | null;
+  url: string;
+  citedByCount: number;
+  isOpenAccess: boolean;
+}
+
+/** Candidato devuelto al buscar un investigador por nombre en OpenAlex (admin). */
+export interface OpenAlexAuthorCandidate {
+  openAlexId: string;
+  name: string;
+  institution: string | null;
+  orcid: string | null;
+  worksCount: number;
+  citedByCount: number;
 }
 
 export interface EquipmentItem {

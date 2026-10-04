@@ -1,3 +1,4 @@
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import HeroCinematic from '../components/hero/HeroCinematic';
 import NewsCard from '../components/noticias/NewsCard';
@@ -5,6 +6,8 @@ import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
 import { api } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
+
+const CircuitOrb = lazy(() => import('../components/three/CircuitOrb'));
 
 const gateways = [
   {
@@ -32,10 +35,42 @@ const gateways = [
 export default function Home() {
   const { data: slides } = useApiData(() => api.heroSlides(), []);
   const { data: news } = useApiData(() => api.news(), []);
+  const { data: teachers } = useApiData(() => api.teachers(), []);
+  const { data: labs } = useApiData(() => api.labs(), []);
+  const { data: subjects } = useApiData(() => api.subjects(), []);
+  const [showOrb, setShowOrb] = useState(false);
+
+  useEffect(() => {
+    setShowOrb(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
+
+  const stats = [
+    { label: 'Docentes', value: teachers?.length },
+    { label: 'Laboratorios', value: labs?.length },
+    { label: 'Materias en la retícula', value: subjects?.length },
+  ];
 
   return (
     <div>
       <HeroCinematic slides={slides ?? []} />
+
+      <section className="relative overflow-hidden bg-deep px-6 py-20 text-center text-surface">
+        {showOrb && (
+          <div className="absolute inset-0 opacity-50">
+            <Suspense fallback={null}>
+              <CircuitOrb />
+            </Suspense>
+          </div>
+        )}
+        <div className="relative mx-auto grid max-w-4xl gap-8 sm:grid-cols-3">
+          {stats.map((stat, i) => (
+            <Reveal key={stat.label} delayMs={i * 100}>
+              <p className="font-mono text-4xl font-bold text-signal">{stat.value ?? '—'}</p>
+              <p className="mt-1 text-sm text-line">{stat.label}</p>
+            </Reveal>
+          ))}
+        </div>
+      </section>
 
       <section className="mx-auto max-w-6xl px-6 py-24">
         <Reveal>

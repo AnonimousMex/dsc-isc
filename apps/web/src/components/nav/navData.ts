@@ -26,7 +26,6 @@ export const navGroups: NavGroup[] = [
       { label: 'Docentes', href: '/docentes', blurb: 'El cuerpo académico que imparte las materias del departamento.' },
       { label: 'Laboratorios', href: '/laboratorios', blurb: 'Los espacios de práctica: redes, software, seguridad y tecnologías web.' },
       { label: 'Normateca', href: '/normateca', blurb: 'Reglamentos, formatos y documentos normativos del departamento.' },
-      { label: 'Biblioteca digital', href: '#', blurb: 'Acceso a los recursos bibliográficos institucionales.', comingSoon: true },
     ],
   },
   {

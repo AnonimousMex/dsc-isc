@@ -3,6 +3,7 @@ dist/
 build/
 .DS_Store
 *.log
+*.tsbuildinfo
 
 # env
 .env
@@ -12,6 +13,7 @@ build/
 # api runtime data
 apps/api/prisma/dev.db
 apps/api/prisma/dev.db-journal
+apps/api/prisma/data-export.json
 apps/api/storage/uploads/**
 !apps/api/storage/uploads/**/.gitkeep
 
@@ -25,3 +27,6 @@ coverage/
 playwright-report/
 test-results/
 tests/e2e/.seed-credentials.json
+
+apps/api/prisma/**/*.db
+apps/api/prisma/**/*.db-journal

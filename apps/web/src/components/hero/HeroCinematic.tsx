@@ -45,6 +45,16 @@ interface HeroCinematicProps {
  *    De ahí en adelante el componente ya no vuelve a escuchar el scroll:
  *    si el usuario sube y baja de nuevo, ve el frame final estático, nunca
  *    repite el efecto — así se documenta el "de un solo uso".
+ *    Importante: el alto del wrapper (`n * 100svh`) NO se reduce a `100svh`
+ *    en el momento en que se activa este candado — solo se reduce si el
+ *    candado YA venía activado desde `sessionStorage` al montar (visita
+ *    subsecuente). Si se encogiera en caliente, mientras el usuario sigue
+ *    con el gesto de scroll activo cerca del final del recorrido, el
+ *    documento pierde de golpe `(n-1)*100svh` de alto arriba de la posición
+ *    de scroll actual y el navegador no la recompensa: el mismo `scrollY`
+ *    pasa a apuntar mucho más abajo, produciendo un brinco que salta
+ *    directo a las secciones siguientes en vez de dejar la última foto
+ *    fija en pantalla.
  * 5. Si `prefers-reduced-motion` está activo, se salta todo lo anterior y
  *    se monta directo en el estado final (sección 5.4/10.6).
  */
@@ -52,6 +62,7 @@ export default function HeroCinematic({ slides }: HeroCinematicProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [locked, setLocked] = useState(() => sessionStorage.getItem(LOCK_KEY) === '1');
+  const lockedOnMount = useRef(locked);
 
   useEffect(() => {
     if (locked || slides.length === 0) return;
@@ -126,7 +137,7 @@ export default function HeroCinematic({ slides }: HeroCinematicProps) {
     <div
       id="hero-wrapper"
       ref={wrapperRef}
-      style={{ height: locked ? '100svh' : `${slides.length * 100}svh` }}
+      style={{ height: lockedOnMount.current ? '100svh' : `${slides.length * 100}svh` }}
       className="relative"
     >
       <div className="sticky top-0 h-svh w-full overflow-hidden bg-deep">

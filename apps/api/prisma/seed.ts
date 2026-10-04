@@ -2,6 +2,8 @@ import 'dotenv/config';
 import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
+import { ISC_PREREQUISITES, ISC_SUBJECTS } from './data/iscReticula2017.js';
+import { DSC_TEACHERS, slugifyName } from './data/teachersDsc.js';
 
 const prisma = new PrismaClient();
 
@@ -161,37 +163,16 @@ async function main() {
     },
   });
 
-  console.log('[seed] materias y prerrequisitos...');
-  const subjectDefs = [
-    { code: 'ISC-101', name: 'Fundamentos de Programación', semester: 1, objective: 'Introducir los principios de la programación estructurada y la resolución algorítmica de problemas.' },
-    { code: 'ISC-102', name: 'Matemáticas Discretas', semester: 1, objective: 'Dotar de las herramientas matemáticas base para el análisis de algoritmos y estructuras de datos.' },
-    { code: 'ISC-103', name: 'Arquitectura de Computadoras', semester: 1, objective: 'Comprender la organización interna de un sistema de cómputo y su relación con el software.' },
-    { code: 'ISC-201', name: 'Estructuras de Datos', semester: 2, objective: 'Diseñar e implementar estructuras de datos eficientes para la solución de problemas computacionales.' },
-    { code: 'ISC-202', name: 'Bases de Datos', semester: 2, objective: 'Modelar, diseñar e implementar bases de datos relacionales para sistemas de información.' },
-    { code: 'ISC-203', name: 'Redes de Computadoras', semester: 2, objective: 'Comprender los fundamentos de comunicación de datos y el diseño de redes.' },
-    { code: 'ISC-301', name: 'Ingeniería de Software', semester: 3, objective: 'Aplicar metodologías de desarrollo para planear, construir y mantener sistemas de software.' },
-    { code: 'ISC-302', name: 'Desarrollo Web', semester: 3, objective: 'Diseñar y construir aplicaciones web completas usando patrones modernos de arquitectura.' },
-    { code: 'ISC-303', name: 'Seguridad Informática', semester: 3, objective: 'Identificar vulnerabilidades y aplicar controles de seguridad en sistemas y redes.' },
-  ];
-
+  console.log('[seed] materias y prerrequisitos (retícula oficial ISC Plan 2017)...');
   const subjectsByCode = new Map<string, { id: string }>();
-  for (const def of subjectDefs) {
+  for (const def of ISC_SUBJECTS) {
     const subject = await prisma.subject.create({
       data: { ...def, programId: isc.id },
     });
     subjectsByCode.set(def.code, subject);
   }
 
-  const prerequisitePairs: Array<[string, string]> = [
-    ['ISC-201', 'ISC-101'],
-    ['ISC-202', 'ISC-201'],
-    ['ISC-203', 'ISC-103'],
-    ['ISC-301', 'ISC-201'],
-    ['ISC-302', 'ISC-201'],
-    ['ISC-302', 'ISC-202'],
-    ['ISC-303', 'ISC-203'],
-  ];
-  for (const [code, prereqCode] of prerequisitePairs) {
+  for (const [code, prereqCode] of ISC_PREREQUISITES) {
     const subject = subjectsByCode.get(code)!;
     const prerequisite = subjectsByCode.get(prereqCode)!;
     await prisma.subjectPrerequisite.create({
@@ -324,31 +305,15 @@ async function main() {
     ],
   });
 
-  console.log('[seed] docentes de ejemplo (sin foto, a propósito — ver DECISIONES.md)...');
-  const teacherDefs = [
-    { fullName: 'Ana Villaseñor Cruz', title: 'Dra. en Ciencias de la Computación', subjects: ['ISC-201', 'ISC-301'] },
-    { fullName: 'Luis Hernández Padilla', title: 'M.C. en Ingeniería de Software', subjects: ['ISC-301', 'ISC-302'] },
-    { fullName: 'Marina Torres Gómez', title: 'Dra. en Seguridad Informática', subjects: ['ISC-303', 'ISC-203'] },
-    { fullName: 'Roberto Salgado Núñez', title: 'M.C. en Redes y Telecomunicaciones', subjects: ['ISC-203', 'ISC-103'] },
-    { fullName: 'Karla Jiménez Ortiz', title: 'M.C. en Bases de Datos', subjects: ['ISC-202', 'ISC-302'] },
-    { fullName: 'Eduardo Ramos Villagómez', title: 'Dr. en Inteligencia Artificial', subjects: ['ISC-101', 'ISC-102'] },
-    { fullName: 'Paola Medina Rangel', title: 'M.C. en Ingeniería de Software', subjects: ['ISC-301', 'ISC-202'] },
-  ];
-
-  for (const teacher of teacherDefs) {
-    const slug = teacher.fullName
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    const created = await prisma.teacher.create({
+  console.log('[seed] docentes (plantilla real del DSC, ver prisma/data/teachersDsc.ts)...');
+  for (const fullName of DSC_TEACHERS) {
+    await prisma.teacher.create({
       data: {
-        slug,
-        fullName: teacher.fullName,
-        title: teacher.title,
-        bio: `${teacher.fullName} es docente del Departamento de Sistemas y Computación. Contenido de biografía pendiente de captura desde el sistema.`,
-        experience: 'Experiencia docente y profesional pendiente de captura desde el sistema.',
+        slug: slugifyName(fullName),
+        fullName,
+        title: 'Docente',
+        bio: '',
+        experience: '',
         photoId: null,
         youtubeUrl: null,
         email: null,
@@ -359,14 +324,6 @@ async function main() {
         isActive: true,
       },
     });
-    for (const code of teacher.subjects) {
-      const subject = subjectsByCode.get(code);
-      if (subject) {
-        await prisma.teacherSubject.create({
-          data: { teacherId: created.id, subjectId: subject.id },
-        });
-      }
-    }
   }
 
   console.log('[seed] noticias de ejemplo...');

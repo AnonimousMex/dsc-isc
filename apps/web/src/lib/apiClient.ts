@@ -9,6 +9,7 @@ import type {
   Specialty,
   Subject,
   Teacher,
+  TeacherArticle,
   TeacherSummary,
   TimelineEvent,
 } from '@dsc-isc/shared';
@@ -37,6 +38,7 @@ export const api = {
   subjects: (programId?: string) => get<Subject[]>(programId ? `/subjects?programId=${programId}` : '/subjects'),
   teachers: () => get<TeacherSummary[]>('/teachers'),
   teacher: (slug: string) => get<Teacher>(`/teachers/${slug}`),
+  teacherArticles: (slug: string) => get<TeacherArticle[]>(`/teachers/${slug}/articles`),
   labs: () => get<Lab[]>('/labs'),
   lab: (slug: string) => get<Lab>(`/labs/${slug}`),
   specialties: () => get<Specialty[]>('/specialties'),
