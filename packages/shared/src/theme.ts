@@ -1,4 +1,4 @@
-import type { SiteConfig } from './types/index';
+import type { SiteConfig } from './types/index.js';
 
 /**
  * Los 4 colores de marca (sección "Apariencia" del admin) se guardan en
