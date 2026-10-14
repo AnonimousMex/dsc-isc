@@ -31,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/oferta-educativa', label: 'Oferta educativa', icon: GraduationCap },
   { to: '/materias', label: 'Materias y retícula', icon: Network },
   { to: '/docentes', label: 'Docentes', icon: Users },
+  { to: '/egresados', label: 'Egresados', icon: GraduationCap, roles: ['SUPERADMIN', 'EDITOR'] },
   { to: '/laboratorios', label: 'Laboratorios', icon: FlaskConical },
   { to: '/especialidades', label: 'Especialidades', icon: Award },
   { to: '/normateca', label: 'Normateca', icon: FileText },

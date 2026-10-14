@@ -5,3 +5,4 @@ export * from './avatar';
 export * from './imageUrl';
 export * from './youtube';
 export * from './theme';
+export * from './graduates';

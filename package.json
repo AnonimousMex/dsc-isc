@@ -16,6 +16,7 @@
     "lint": "npm run lint -ws --if-present",
     "test": "npm run test -ws --if-present",
     "test:e2e": "playwright test",
+    "test:graduates:ui": "playwright test --config tests/graduate-ui/playwright.config.ts",
     "prisma:migrate": "npm run prisma:migrate -w apps/api",
     "prisma:seed": "npm run prisma:seed -w apps/api"
   },

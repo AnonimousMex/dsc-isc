@@ -39,6 +39,8 @@ export const navGroups: NavGroup[] = [
     label: 'Egresados',
     links: [
       { label: 'Titulación', href: '/egresados', blurb: 'Proceso de titulación y egresados del departamento.' },
+      { label: 'Soy un egresado', href: '/egresados/registro', blurb: 'Registra tu perfil, comparte tu trayectoria y solicita la verificación de tu título.' },
+      { label: 'Comunidad de egresados', href: '/egresados', blurb: 'Conoce los perfiles y la experiencia de nuestros egresados verificados.' },
       { label: 'Noticias', href: '/noticias', blurb: 'Lo más reciente del departamento y su comunidad.' },
     ],
   },
