@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ZodError } from 'zod';
-import { teacherSchema, type Subject, type Teacher, type TeacherSummary } from '@dsc-isc/shared';
+import { TEACHER_SPECIALTIES, teacherSchema, type Subject, type Teacher, type TeacherSummary } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
+import HeroImageField from '../components/HeroImageField';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import MultiSelect from '../components/MultiSelect';
+import OpenAlexLinkField from '../components/OpenAlexLinkField';
 import { Button } from '../components/ui/button';
 import {
   Dialog,
@@ -15,6 +17,7 @@ import {
 } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { apiDelete, apiGet, apiPost, apiPut, ApiError } from '../lib/apiClient';
 
 const emptyForm = {
@@ -29,6 +32,8 @@ const emptyForm = {
   linkedin: '',
   facebook: '',
   twitter: '',
+  openAlexId: '',
+  specialty: '',
   isActive: true,
   subjectIds: [] as string[],
 };
@@ -82,6 +87,8 @@ export default function Docentes() {
       linkedin: teacher.linkedin ?? '',
       facebook: teacher.facebook ?? '',
       twitter: teacher.twitter ?? '',
+      openAlexId: teacher.openAlexId ?? '',
+      specialty: teacher.specialty ?? '',
       isActive: teacher.isActive,
       subjectIds: teacher.subjectIds,
     });
@@ -103,6 +110,8 @@ export default function Docentes() {
       linkedin: form.linkedin || null,
       facebook: form.facebook || null,
       twitter: form.twitter || null,
+      openAlexId: form.openAlexId || null,
+      specialty: form.specialty || null,
       isActive: form.isActive,
       subjectIds: form.subjectIds,
     };
@@ -137,6 +146,8 @@ export default function Docentes() {
         </div>
         <Button onClick={openCreate}>Nuevo docente</Button>
       </div>
+
+      <HeroImageField configKey="docentes.heroImageUrl" />
 
       <div className="mt-6">
         <DataTable
@@ -261,6 +272,31 @@ export default function Docentes() {
                   onChange={(e) => setForm({ ...form, twitter: e.target.value })}
                 />
               </div>
+            </div>
+
+            <OpenAlexLinkField
+              value={form.openAlexId}
+              onChange={(openAlexId) => setForm({ ...form, openAlexId })}
+              defaultQuery={form.fullName}
+            />
+
+            <div className="flex flex-col gap-1.5">
+              <Label>Especialidad</Label>
+              <Select
+                value={form.specialty || undefined}
+                onValueChange={(specialty) => setForm({ ...form, specialty })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sin especialidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEACHER_SPECIALTIES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

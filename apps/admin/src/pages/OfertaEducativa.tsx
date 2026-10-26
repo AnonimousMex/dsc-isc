@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { ZodError } from 'zod';
 import { programSchema, type Program } from '@dsc-isc/shared';
+import HeroImageField from '../components/HeroImageField';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -107,6 +108,8 @@ export default function OfertaEducativa() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-ink">Oferta educativa</h1>
       </div>
+
+      <HeroImageField configKey="ofertaEducativa.heroImageUrl" />
 
       <div className="mt-4 flex items-end gap-3">
         <div className="flex flex-col gap-1.5">

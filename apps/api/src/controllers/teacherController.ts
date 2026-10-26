@@ -3,6 +3,8 @@ import type { Request, Response } from 'express';
 import { teacherSchema } from '@dsc-isc/shared';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { recordAudit } from '../lib/audit.js';
+import { HttpError } from '../middleware/errorHandler.js';
+import * as openAlexService from '../services/openAlexService.js';
 import * as teacherService from '../services/teacherService.js';
 
 export const list = asyncHandler(async (req: Request, res: Response) => {
@@ -11,6 +13,24 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 
 export const getBySlug = asyncHandler(async (req: Request, res: Response) => {
   res.json(await teacherService.getTeacherBySlug(pathParam(req, 'slug')));
+});
+
+export const getArticles = asyncHandler(async (req: Request, res: Response) => {
+  const teacher = await teacherService.getTeacherBySlug(pathParam(req, 'slug'));
+  if (!teacher.openAlexId) {
+    res.json([]);
+    return;
+  }
+  res.json(await openAlexService.fetchArticlesForAuthor(teacher.openAlexId));
+});
+
+// Solo para el admin: busca candidatos en OpenAlex por nombre, para que se
+// elija a mano al investigador correcto antes de enlazarlo (ver notebook de
+// referencia sobre el problema de homónimos).
+export const searchOpenAlexAuthors = asyncHandler(async (req: Request, res: Response) => {
+  const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+  if (q.length < 2) throw new HttpError(400, 'Escribe al menos 2 caracteres para buscar');
+  res.json(await openAlexService.searchAuthors(q));
 });
 
 export const create = asyncHandler(async (req: Request, res: Response) => {

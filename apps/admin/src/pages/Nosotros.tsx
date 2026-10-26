@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { timelineEventSchema, type SiteConfig, type TimelineEvent } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
+import HeroImageField from '../components/HeroImageField';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
@@ -104,6 +105,8 @@ export default function Nosotros() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-ink">Nosotros</h1>
+
+      <HeroImageField configKey="nosotros.heroImageUrl" />
 
       <Card className="mt-6">
         <CardHeader>

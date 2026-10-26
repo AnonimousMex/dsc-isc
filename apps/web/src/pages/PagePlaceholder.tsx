@@ -17,7 +17,9 @@ export default function PagePlaceholder({ eyebrow, title }: PagePlaceholderProps
       <Reveal>
         <SectionEyebrow>{eyebrow}</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">{title}</h1>
-        <p className="mt-4 text-muted">Esta sección está en construcción y se completa en una fase posterior.</p>
+        <p className="mt-4 text-muted">
+          Esta sección está en construcción y se completa en una fase posterior.
+        </p>
       </Reveal>
     </div>
   );

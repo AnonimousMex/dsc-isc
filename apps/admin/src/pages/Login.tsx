@@ -94,7 +94,9 @@ export default function Login() {
     setSubmitting(true);
     try {
       await apiPost('/auth/forgot-password', { email });
-      setInfo('Si el correo existe, se envió un código de recuperación. Revisa tu bandeja de entrada.');
+      setInfo(
+        'Si el correo existe, se envió un código de recuperación. Revisa tu bandeja de entrada.',
+      );
       setStep('forgot-reset');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo enviar el código');
@@ -122,14 +124,22 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-elevated px-4">
+    <div className="admin-login flex min-h-svh items-center justify-center bg-elevated px-4">
       <div className="w-full max-w-sm rounded-lg border border-line bg-surface p-8 shadow-sm">
-        <img src="/logos/dsc-logo.png" alt="Departamento de Sistemas y Computación" className="h-10 w-auto" />
+        <img
+          src="/logos/dsc-logo.png"
+          alt="Departamento de Sistemas y Computación"
+          className="h-10 w-auto brightness-0 invert"
+        />
         <h1 className="mt-4 text-xl font-bold text-ink">Iniciar sesión</h1>
+        <p className="mt-2 text-sm text-muted">
+          Panel de contenido · Ingeniería en Sistemas Computacionales
+        </p>
 
-        {info && (step === 'credentials' || step === 'forgot-request' || step === 'forgot-reset') && (
-          <p className="mt-4 text-sm text-primary">{info}</p>
-        )}
+        {info &&
+          (step === 'credentials' || step === 'forgot-request' || step === 'forgot-reset') && (
+            <p className="mt-4 text-sm text-primary">{info}</p>
+          )}
 
         {step === 'credentials' && (
           <form className="mt-6 flex flex-col gap-4" onSubmit={handleCredentialsSubmit}>
@@ -180,8 +190,8 @@ export default function Login() {
         {step === 'forgot-request' && (
           <form className="mt-6 flex flex-col gap-4" onSubmit={handleForgotRequestSubmit}>
             <p className="text-sm text-muted">
-              Escribe tu correo y te enviaremos un código de recuperación de 6 dígitos, válido por 15
-              minutos.
+              Escribe tu correo y te enviaremos un código de recuperación de 6 dígitos, válido por
+              15 minutos.
             </p>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="forgot-email">Correo</Label>
@@ -298,8 +308,8 @@ export default function Login() {
           <form className="mt-6 flex flex-col gap-4" onSubmit={handleTotpSetupSubmit}>
             <p className="text-sm text-muted">
               Tu cuenta requiere doble factor de autenticación. Escanea este enlace en Google
-              Authenticator, Authy o una app similar (o captura la clave manualmente), y confirma con
-              el código generado.
+              Authenticator, Authy o una app similar (o captura la clave manualmente), y confirma
+              con el código generado.
             </p>
             <div className="rounded-md border border-line bg-elevated p-3 text-xs">
               <p className="font-mono break-all text-muted">{otpauthUrl}</p>

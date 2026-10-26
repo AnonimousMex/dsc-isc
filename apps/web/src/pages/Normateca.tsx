@@ -1,100 +1,109 @@
-import { lazy, useState } from 'react';
+import { useState } from 'react';
+import { ArrowDownToLine, FileText, Search } from 'lucide-react';
+import PageBanner from '../components/shared/PageBanner';
 import Reveal from '../components/shared/Reveal';
-import SectionHero3D from '../components/shared/SectionHero3D';
-import { api } from '../lib/apiClient';
+import { ContentStatus, EditorialIntro } from '../components/shared/Editorial';
+import { api, siteConfigValue } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
-
-const DocumentStack = lazy(() => import('../components/three/DocumentStack'));
-
-const CATEGORIES = ['Reglamento', 'Formato', 'Normativa'] as const;
-
+const CATEGORIES = ['Reglamento', 'Formato', 'Normativa'];
 export default function Normateca() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(null);
-
-  const { data: documents, loading } = useApiData(
+  const {
+    data: documents,
+    loading,
+    error,
+  } = useApiData(
     () => api.documents({ category: category ?? undefined, q: query || undefined }),
     [category, query],
   );
-
+  const { data: config } = useApiData(() => api.siteConfig(), []);
   return (
-    <div>
-      <SectionHero3D
-        eyebrow="Nosotros"
-        title="Normateca"
-        description="Reglamentos, formatos y documentos normativos del departamento, incluido el reglamento de laboratorios."
-        scene={DocumentStack}
+    <div className="interior-page resources-page">
+      <PageBanner
+        sculpture="resources"
+        eyebrow="Normateca"
+        title="Todo en su lugar."
+        imageUrl={config ? siteConfigValue<string>(config, 'normateca.heroImageUrl') : undefined}
       />
-
-      <div className="mx-auto max-w-4xl px-6 py-20">
-        <Reveal
-          delayMs={80}
-          className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar documento..."
-            className="w-full rounded-md border border-line bg-surface px-4 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal sm:max-w-xs"
-            aria-label="Buscar en la normateca"
-          />
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setCategory(null)}
-              className={`rounded-full border px-3 py-1 text-xs ${
-                category === null
-                  ? 'border-primary bg-primary text-surface'
-                  : 'border-line text-muted'
-              }`}
-            >
-              Todos
-            </button>
-            {CATEGORIES.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setCategory(c)}
-                className={`rounded-full border px-3 py-1 text-xs ${
-                  category === c ? 'border-primary bg-primary text-surface' : 'border-line text-muted'
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </Reveal>
-
-        <div className="mt-8">
-          {!loading && documents && documents.length === 0 && (
-            <p className="text-sm text-muted">Aún no hay documentos publicados en esta categoría.</p>
-          )}
-          {documents && documents.length > 0 && (
-            <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
-              {documents.map((doc) => (
+      <section className="page-width section-space">
+        <EditorialIntro title="Menos vueltas. Más claridad.">
+          <p>
+            Reglamentos, formatos y documentos para acompañar tu trayectoria en Ingeniería en
+            Sistemas Computacionales.
+          </p>
+        </EditorialIntro>
+        <div className="resource-workspace">
+          <aside className="resource-sidebar">
+            <p className="section-kicker">BIBLIOTECA ACADÉMICA</p>
+            <h2>
+              ¿Qué necesitas
+              <br />
+              consultar?
+            </h2>
+            <div role="group" aria-label="Categoría de documentos">
+              {[null, ...CATEGORIES].map((item) => (
+                <button
+                  key={item ?? 'all'}
+                  type="button"
+                  aria-pressed={category === item}
+                  onClick={() => setCategory(item)}
+                  className={category === item ? 'selected' : ''}
+                >
+                  {item ?? 'Todos los documentos'}
+                  <ArrowDownToLine size={15} />
+                </button>
+              ))}
+            </div>
+            <p className="resource-help">
+              Consulta la fecha de actualización de cada documento antes de utilizarlo.
+            </p>
+          </aside>
+          <div className="resource-results">
+            <label className="resource-search">
+              <Search size={19} />
+              <input
+                type="search"
+                aria-label="Buscar en la normateca"
+                placeholder="Buscar un documento…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </label>
+            <div className="result-count" role="status">
+              {loading
+                ? 'BUSCANDO…'
+                : `${documents?.length ?? 0} DOCUMENTOS / ${category ?? 'TODOS'}`}
+            </div>
+            <ContentStatus
+              loading={loading}
+              error={error}
+              empty={!documents?.length}
+              noun="documentos para esta búsqueda"
+            />
+            <ul className="document-list">
+              {documents?.map((doc, i) => (
                 <li key={doc.id}>
-                  <a
-                    href={doc.media.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between gap-4 px-4 py-4 hover:bg-elevated"
-                  >
-                    <div>
-                      <p className="font-medium text-ink">{doc.title}</p>
-                      <p className="mt-1 font-mono text-xs text-muted">
-                        {doc.category} · actualizado{' '}
-                        {new Date(doc.updatedAt).toLocaleDateString('es-MX')}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs font-medium text-accent">Ver documento →</span>
-                  </a>
+                  <Reveal delayMs={(i % 5) * 40}>
+                    <a href={doc.media.url} target="_blank" rel="noreferrer">
+                      <span className="document-icon">
+                        <FileText strokeWidth={1.2} size={26} />
+                      </span>
+                      <div>
+                        <span className="section-kicker">{doc.category}</span>
+                        <h3>{doc.title}</h3>
+                        <p>Actualizado el {new Date(doc.updatedAt).toLocaleDateString('es-MX')}</p>
+                      </div>
+                      <ArrowDownToLine className="download-icon" size={22} />
+                      <span className="sr-only">Abrir documento en otra pestaña</span>
+                    </a>
+                  </Reveal>
                 </li>
               ))}
             </ul>
-          )}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

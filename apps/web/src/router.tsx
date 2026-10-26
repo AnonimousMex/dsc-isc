@@ -13,8 +13,11 @@ import EspecialidadDetalle from './pages/EspecialidadDetalle';
 import Normateca from './pages/Normateca';
 import Comunidad from './pages/Comunidad';
 import Egresados from './pages/Egresados';
+import RegistroEgresado from './pages/RegistroEgresado';
+import EgresadoDetalle from './pages/EgresadoDetalle';
 import Noticias from './pages/Noticias';
 import NoticiaDetalle from './pages/NoticiaDetalle';
+import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 
 export const router = createBrowserRouter([
   {
@@ -34,8 +37,11 @@ export const router = createBrowserRouter([
       { path: 'comunidad', element: <Comunidad /> },
       { path: 'comunidad/:seccion', element: <Comunidad /> },
       { path: 'egresados', element: <Egresados /> },
+      { path: 'egresados/registro', element: <RegistroEgresado /> },
+      { path: 'egresados/perfil/:id', element: <EgresadoDetalle /> },
       { path: 'noticias', element: <Noticias /> },
       { path: 'noticias/:slug', element: <NoticiaDetalle /> },
+      { path: 'aviso-de-privacidad', element: <AvisoDePrivacidad /> },
       { path: '*', element: <PagePlaceholder eyebrow="Error 404" title="Página no encontrada" /> },
     ],
   },

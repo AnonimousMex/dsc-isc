@@ -9,11 +9,23 @@ import type {
   Specialty,
   Subject,
   Teacher,
+  TeacherArticle,
   TeacherSummary,
   TimelineEvent,
 } from '@dsc-isc/shared';
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+export async function registerGraduate(form: FormData): Promise<{ message: string }> {
+  const res = await fetch(`${API_URL}/api/graduates/register`, { method: 'POST', body: form });
+  const body = await res.json();
+  if (!res.ok) {
+    const fieldErrors = body.details?.fieldErrors as Record<string, string[]> | undefined;
+    const detail = fieldErrors ? Object.values(fieldErrors).flat()[0] : undefined;
+    throw new Error(res.status === 409 ? 'Ya existe una solicitud con ese correo. Contacta al departamento para actualizarla.' : detail ?? body.error ?? 'No se pudo enviar la solicitud');
+  }
+  return body;
+}
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}/api${path}`);
@@ -29,6 +41,8 @@ async function get<T>(path: string): Promise<T> {
  * sesión (eso vive en el cliente de apps/admin).
  */
 export const api = {
+  graduates: () => get<import('@dsc-isc/shared').GraduateProfile[]>('/graduates'),
+  graduate: (id: string) => get<import('@dsc-isc/shared').GraduateProfile>(`/graduates/${encodeURIComponent(id)}`),
   heroSlides: () => get<HeroSlide[]>('/hero-slides'),
   siteConfig: () => get<SiteConfig[]>('/site-config'),
   timeline: () => get<TimelineEvent[]>('/timeline'),
@@ -37,6 +51,7 @@ export const api = {
   subjects: (programId?: string) => get<Subject[]>(programId ? `/subjects?programId=${programId}` : '/subjects'),
   teachers: () => get<TeacherSummary[]>('/teachers'),
   teacher: (slug: string) => get<Teacher>(`/teachers/${slug}`),
+  teacherArticles: (slug: string) => get<TeacherArticle[]>(`/teachers/${slug}/articles`),
   labs: () => get<Lab[]>('/labs'),
   lab: (slug: string) => get<Lab>(`/labs/${slug}`),
   specialties: () => get<Specialty[]>('/specialties'),

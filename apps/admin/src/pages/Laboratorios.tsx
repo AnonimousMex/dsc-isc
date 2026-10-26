@@ -6,7 +6,13 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import { Button } from '../components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { apiDelete, apiGet, apiPost, apiPut, ApiError } from '../lib/apiClient';
@@ -74,7 +80,9 @@ export default function Laboratorios() {
     try {
       labSchema.parse(payload);
     } catch (err) {
-      setError(err instanceof ZodError ? (err.issues[0]?.message ?? 'Datos inválidos') : 'Datos inválidos');
+      setError(
+        err instanceof ZodError ? (err.issues[0]?.message ?? 'Datos inválidos') : 'Datos inválidos',
+      );
       return;
     }
     try {
@@ -94,13 +102,21 @@ export default function Laboratorios() {
         <Button onClick={openCreate}>Nuevo laboratorio</Button>
       </div>
 
+      <p className="mt-4 text-sm text-muted">
+        Las fotos del explorador público se toman de la galería de cada laboratorio. Edita una ficha
+        para actualizarlas.
+      </p>
+
       <div className="mt-6">
         <DataTable
           data={labs}
           getRowId={(l) => l.id}
           emptyMessage={loading ? 'Cargando…' : 'Aún no hay laboratorios.'}
           columns={[
-            { header: 'Nombre', cell: (l) => <span className="font-medium text-ink">{l.name}</span> },
+            {
+              header: 'Nombre',
+              cell: (l) => <span className="font-medium text-ink">{l.name}</span>,
+            },
             { header: 'Slug', cell: (l) => <span className="font-mono text-xs">{l.slug}</span> },
             { header: 'Equipo', cell: (l) => `${l.equipment.length} items` },
             { header: 'Galería', cell: (l) => `${l.gallery.length} fotos` },
@@ -128,11 +144,19 @@ export default function Laboratorios() {
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="name">Nombre</Label>
-                <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="slug">Slug (URL)</Label>
-                <Input id="slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                <Input
+                  id="slug"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                />
               </div>
             </div>
 
@@ -175,7 +199,9 @@ export default function Laboratorios() {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => setForm({ ...form, equipment: form.equipment.filter((_, j) => j !== i) })}
+                      onClick={() =>
+                        setForm({ ...form, equipment: form.equipment.filter((_, j) => j !== i) })
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -185,7 +211,9 @@ export default function Laboratorios() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setForm({ ...form, equipment: [...form.equipment, { label: '', value: '' }] })}
+                  onClick={() =>
+                    setForm({ ...form, equipment: [...form.equipment, { label: '', value: '' }] })
+                  }
                 >
                   <Plus className="h-3 w-3" /> Agregar equipo
                 </Button>
@@ -196,12 +224,18 @@ export default function Laboratorios() {
               <p className="mb-2 text-sm font-medium text-ink">Materias que se imparten aquí</p>
               <div className="flex flex-wrap gap-2">
                 {form.relatedSubjects.map((name, i) => (
-                  <span key={name} className="flex items-center gap-1 rounded-full border border-line px-3 py-1 text-xs">
+                  <span
+                    key={name}
+                    className="flex items-center gap-1 rounded-full border border-line px-3 py-1 text-xs"
+                  >
                     {name}
                     <button
                       type="button"
                       onClick={() =>
-                        setForm({ ...form, relatedSubjects: form.relatedSubjects.filter((_, j) => j !== i) })
+                        setForm({
+                          ...form,
+                          relatedSubjects: form.relatedSubjects.filter((_, j) => j !== i),
+                        })
                       }
                     >
                       ✕
@@ -240,7 +274,9 @@ export default function Laboratorios() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => setForm({ ...form, gallery: form.gallery.filter((_, j) => j !== i) })}
+                      onClick={() =>
+                        setForm({ ...form, gallery: form.gallery.filter((_, j) => j !== i) })
+                      }
                     >
                       Quitar
                     </Button>
@@ -248,7 +284,9 @@ export default function Laboratorios() {
                 ))}
                 <ImageUploader
                   value={null}
-                  onChange={(media) => media && setForm({ ...form, gallery: [...form.gallery, media] })}
+                  onChange={(media) =>
+                    media && setForm({ ...form, gallery: [...form.gallery, media] })
+                  }
                   label="Agregar foto a la galería"
                 />
               </div>

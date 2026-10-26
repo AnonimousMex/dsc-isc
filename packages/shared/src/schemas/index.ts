@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TEACHER_SPECIALTIES } from '../types/index.js';
 
 /**
  * Esquemas Zod para los payloads de escritura (create/update) de cada
@@ -100,6 +101,17 @@ export const teacherSchema = z.object({
   linkedin: urlSchema.nullable().optional().or(z.literal('')),
   facebook: urlSchema.nullable().optional().or(z.literal('')),
   twitter: urlSchema.nullable().optional().or(z.literal('')),
+  // ID de autor en OpenAlex (https://openalex.org), ej. "A5017972615" — se
+  // captura a mano tras desambiguar homónimos, nunca se resuelve por nombre
+  // en automático (ver services/openAlexService.ts en apps/api).
+  openAlexId: z
+    .string()
+    .trim()
+    .regex(/^A\d{6,}$/, 'Debe ser un OpenAlex ID válido (ej. A5017972615)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
+  specialty: z.enum(TEACHER_SPECIALTIES).nullable().optional().or(z.literal('')),
   isActive: z.boolean().default(true),
   subjectIds: z.array(z.string()).default([]),
 });
@@ -108,6 +120,12 @@ export const subjectSchema = z.object({
   code: z.string().min(2).max(20),
   name: z.string().min(2).max(160),
   semester: z.number().int().min(1).max(20),
+  credits: z.number().int().min(0).max(60).nullable().optional(),
+  theoryHours: z.number().int().min(0).max(40).nullable().optional(),
+  practicalHours: z.number().int().min(0).max(40).nullable().optional(),
+  academicSourceUrl: z.string().url().refine(value => /^https?:\/\//.test(value), 'Usa un enlace HTTP o HTTPS.').nullable().optional(),
+  prerequisitesVerified: z.boolean().optional(),
+  syllabusMediaId: z.string().min(1).nullable().optional(),
   objective: z.string().max(2000),
   programId: z.string().min(1),
   prerequisiteIds: z.array(z.string()).default([]),

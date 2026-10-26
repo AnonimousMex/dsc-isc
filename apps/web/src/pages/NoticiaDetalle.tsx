@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
 import { api } from '../lib/apiClient';
@@ -20,8 +20,11 @@ export default function NoticiaDetalle() {
   }
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-24">
-      <Reveal>
+    <article className="detail-editorial article-editorial page-width">
+      <Link to="/noticias" className="text-sm text-accent underline">
+        ← Noticias
+      </Link>
+      <Reveal className="mt-4">
         <SectionEyebrow>Noticias</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">{news.title}</h1>
         {news.publishedAt && (

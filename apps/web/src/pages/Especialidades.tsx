@@ -1,65 +1,71 @@
-import { lazy } from 'react';
 import { Link } from 'react-router-dom';
-import { resizeImageUrl, type Specialty } from '@dsc-isc/shared';
+import { ArrowUpRight } from 'lucide-react';
+import PageBanner from '../components/shared/PageBanner';
 import Reveal from '../components/shared/Reveal';
-import SectionHero3D from '../components/shared/SectionHero3D';
-import { api } from '../lib/apiClient';
+import { ContentStatus, EditorialIntro } from '../components/shared/Editorial';
+import { api, siteConfigValue } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
-import { useTilt } from '../lib/useTilt';
-
-const BranchTree = lazy(() => import('../components/three/BranchTree'));
-
-function SpecialtyCard({ specialty }: { specialty: Specialty }) {
-  const { ref, style, onMouseMove, onMouseLeave } = useTilt<HTMLAnchorElement>();
-
-  return (
-    <Link
-      ref={ref}
-      to={`/especialidades/${specialty.slug}`}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      style={style}
-      className="group relative block aspect-[3/4] overflow-hidden rounded-xl shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
-    >
-      {specialty.image && (
-        <img
-          src={resizeImageUrl(specialty.image.url, 700)}
-          alt={specialty.image.alt ?? specialty.name}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-          loading="lazy"
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-deep/95 via-deep/30 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-6 text-surface">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-signal">Especialidad</span>
-        <h2 className="mt-2 text-xl font-bold leading-tight">{specialty.name}</h2>
-        <p className="mt-2 line-clamp-3 text-sm text-line">{specialty.description}</p>
-      </div>
-    </Link>
-  );
-}
 
 export default function Especialidades() {
-  const { data: specialties } = useApiData(() => api.specialties(), []);
-
+  const { data: specialties, loading, error } = useApiData(() => api.specialties(), []);
+  const { data: config } = useApiData(() => api.siteConfig(), []);
   return (
-    <div>
-      <SectionHero3D
-        eyebrow="Posgrado"
-        title="Retículas y especialidades"
-        description="Tres especialidades para continuar la formación después de la licenciatura."
-        scene={BranchTree}
+    <div className="interior-page specialties-page">
+      <PageBanner
+        sculpture="specialties"
+        eyebrow="Especialidades"
+        title="Dale dirección a tu talento."
+        imageUrl={
+          (config && siteConfigValue<string>(config, 'especialidades.heroImageUrl')) ||
+          '/images/tecnologia.jpg'
+        }
+        imageAlt="Fotografía editorial de tecnología electrónica"
       />
-
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid gap-8 sm:grid-cols-3">
-          {(specialties ?? []).map((specialty, i) => (
-            <Reveal key={specialty.id} delayMs={i * 100}>
-              <SpecialtyCard specialty={specialty} />
+      <section className="page-width section-space">
+        <EditorialIntro title="Encuentra tu siguiente enfoque.">
+          <p>
+            Explora las áreas de especialidad de Ingeniería en Sistemas Computacionales y conoce el
+            contenido de cada una.
+          </p>
+        </EditorialIntro>
+        <ContentStatus
+          loading={loading}
+          error={error}
+          empty={!specialties?.length}
+          noun="las especialidades"
+        />
+        <div className="specialty-list">
+          {specialties?.map((item, i) => (
+            <Reveal key={item.id} delayMs={(i % 3) * 70}>
+              <Link to={`/especialidades/${item.slug}`} className="specialty-editorial">
+                <div className="specialty-image">
+                  <img
+                    src={
+                      item.image?.url ??
+                      ['/images/tecnologia.jpg', '/images/desarrollo.jpg', '/images/comunidad.jpg'][
+                        i % 3
+                      ]
+                    }
+                    alt={
+                      item.image?.alt ??
+                      (item.image ? item.name : 'Fotografía editorial de tecnología y colaboración')
+                    }
+                    loading="lazy"
+                  />
+                </div>
+                <div>
+                  <p className="section-kicker">ESPECIALIDAD / ISC</p>
+                  <h2>{item.name}</h2>
+                  <p>{item.description}</p>
+                  <span className="text-link">
+                    Conoce la especialidad <ArrowUpRight size={20} />
+                  </span>
+                </div>
+              </Link>
             </Reveal>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

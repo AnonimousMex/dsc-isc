@@ -1,9 +1,11 @@
 import type { Prisma } from '@prisma/client';
 import { hasCycle, type Subject, type SubjectInput } from '@dsc-isc/shared';
+import { toMediaAssetDto } from '../lib/mediaDto.js';
 import { prisma } from '../lib/prisma.js';
 import { HttpError } from '../middleware/errorHandler.js';
 
 const include = {
+  syllabus: true,
   prerequisites: true,
   teachers: true,
 } satisfies Prisma.SubjectInclude;
@@ -15,6 +17,12 @@ function toDto(row: SubjectRow): Subject {
     code: row.code,
     name: row.name,
     semester: row.semester,
+    credits: row.credits,
+    theoryHours: row.theoryHours,
+    practicalHours: row.practicalHours,
+    academicSourceUrl: row.academicSourceUrl,
+    prerequisitesVerified: row.prerequisitesVerified,
+    syllabus: row.syllabus ? toMediaAssetDto(row.syllabus) : null,
     objective: row.objective,
     programId: row.programId,
     teacherIds: row.teachers.map((t) => t.teacherId),
@@ -54,13 +62,27 @@ async function assertNoCycle(subjectId: string, prerequisiteIds: string[]) {
   }
 }
 
+async function assertDocument(id?: string | null) {
+  if (!id) return;
+  const media = await prisma.mediaAsset.findUnique({ where: { id } });
+  if (!media || media.kind !== 'DOCUMENT')
+    throw new HttpError(400, 'Selecciona un documento válido para el temario');
+}
+
 export async function createSubject(input: SubjectInput): Promise<Subject> {
+  await assertDocument(input.syllabusMediaId);
   await assertNoCycle('__new__', input.prerequisiteIds);
   const created = await prisma.subject.create({
     data: {
       code: input.code,
       name: input.name,
       semester: input.semester,
+      credits: input.credits ?? null,
+      theoryHours: input.theoryHours,
+      practicalHours: input.practicalHours,
+      academicSourceUrl: input.academicSourceUrl,
+      prerequisitesVerified: input.prerequisitesVerified,
+      syllabusMediaId: input.syllabusMediaId,
       objective: input.objective,
       programId: input.programId,
     },
@@ -77,6 +99,7 @@ export async function createSubject(input: SubjectInput): Promise<Subject> {
 }
 
 export async function updateSubject(id: string, input: SubjectInput): Promise<Subject> {
+  await assertDocument(input.syllabusMediaId);
   await assertNoCycle(id, input.prerequisiteIds);
 
   await prisma.$transaction([
@@ -86,6 +109,12 @@ export async function updateSubject(id: string, input: SubjectInput): Promise<Su
         code: input.code,
         name: input.name,
         semester: input.semester,
+        credits: input.credits ?? null,
+        theoryHours: input.theoryHours,
+        practicalHours: input.practicalHours,
+        academicSourceUrl: input.academicSourceUrl,
+        prerequisitesVerified: input.prerequisitesVerified,
+        syllabusMediaId: input.syllabusMediaId,
         objective: input.objective,
         programId: input.programId,
       },
@@ -94,7 +123,10 @@ export async function updateSubject(id: string, input: SubjectInput): Promise<Su
     ...(input.prerequisiteIds.length > 0
       ? [
           prisma.subjectPrerequisite.createMany({
-            data: input.prerequisiteIds.map((prerequisiteId) => ({ subjectId: id, prerequisiteId })),
+            data: input.prerequisiteIds.map((prerequisiteId) => ({
+              subjectId: id,
+              prerequisiteId,
+            })),
           }),
         ]
       : []),

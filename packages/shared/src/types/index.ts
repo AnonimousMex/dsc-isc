@@ -84,11 +84,27 @@ export interface Subject {
   code: string;
   name: string;
   semester: number;
+  credits: number | null;
+  theoryHours?: number | null;
+  practicalHours?: number | null;
+  academicSourceUrl?: string | null;
+  prerequisitesVerified?: boolean;
+  syllabus?: MediaAsset | null;
   objective: string;
   programId: string;
   teacherIds: string[];
   prerequisiteIds: string[];
 }
+
+/** Especialidades fijas para filtrar el directorio de docentes (sección "Docentes"). */
+export const TEACHER_SPECIALTIES = [
+  'Inteligencia Artificial',
+  'Desarrollo de Software',
+  'Redes y Sistemas',
+  'Bases de Datos y Cloud',
+] as const;
+
+export type TeacherSpecialty = (typeof TEACHER_SPECIALTIES)[number];
 
 export interface TeacherSummary {
   id: string;
@@ -96,6 +112,7 @@ export interface TeacherSummary {
   fullName: string;
   title: string;
   photo: MediaAsset | null;
+  specialty: string | null;
   isActive: boolean;
 }
 
@@ -108,7 +125,31 @@ export interface Teacher extends TeacherSummary {
   linkedin: string | null;
   facebook: string | null;
   twitter: string | null;
+  openAlexId: string | null;
   subjectIds: string[];
+}
+
+/** Publicación recuperada en vivo desde OpenAlex para un docente enlazado. */
+export interface TeacherArticle {
+  id: string;
+  title: string;
+  year: number | null;
+  type: string;
+  venue: string | null;
+  doi: string | null;
+  url: string;
+  citedByCount: number;
+  isOpenAccess: boolean;
+}
+
+/** Candidato devuelto al buscar un investigador por nombre en OpenAlex (admin). */
+export interface OpenAlexAuthorCandidate {
+  openAlexId: string;
+  name: string;
+  institution: string | null;
+  orcid: string | null;
+  worksCount: number;
+  citedByCount: number;
 }
 
 export interface EquipmentItem {

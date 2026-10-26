@@ -1,76 +1,99 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { Download, ArrowDown, ArrowUpRight, Play } from 'lucide-react';
 import { toYoutubeEmbedUrl, type TeacherSummary } from '@dsc-isc/shared';
-import CircuitBoard from '../components/reticula/CircuitBoard';
+import ProfileTabs from '../components/oferta/ProfileTabs';
+import SystemsExplorer from '../components/oferta/SystemsExplorer';
+import CareerLogo from '../components/shared/CareerLogo';
+import SemesterReticula from '../components/reticula/SemesterReticula';
+import PageBanner from '../components/shared/PageBanner';
 import Reveal from '../components/shared/Reveal';
-import SectionEyebrow from '../components/shared/SectionEyebrow';
-import { api } from '../lib/apiClient';
+import { ContentStatus } from '../components/shared/Editorial';
+import { api, siteConfigValue } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
-
-const CircuitOrb = lazy(() => import('../components/three/CircuitOrb'));
 
 export default function OfertaEducativa() {
   const { programSlug = '' } = useParams<{ programSlug: string }>();
-  const { data: program, loading, error } = useApiData(() => api.program(programSlug), [programSlug]);
-  const { data: subjects } = useApiData(() => (program ? api.subjects(program.id) : Promise.resolve([])), [
-    program?.id,
-  ]);
+  const {
+    data: program,
+    loading,
+    error,
+  } = useApiData(() => api.program(programSlug), [programSlug]);
+  const { data: subjects } = useApiData(
+    () => (program ? api.subjects(program.id) : Promise.resolve([])),
+    [program?.id],
+  );
   const { data: teachers } = useApiData(() => api.teachers(), []);
-  const [showOrb, setShowOrb] = useState(false);
-
-  useEffect(() => {
-    setShowOrb(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }, []);
-
-  const teachersById = useMemo(() => {
-    const map: Record<string, TeacherSummary> = {};
-    for (const teacher of teachers ?? []) map[teacher.id] = teacher;
-    return map;
-  }, [teachers]);
-
-  if (loading) return null;
-
-  if (error || !program) {
+  const { data: config } = useApiData(() => api.siteConfig(), []);
+  const teachersById = useMemo(
+    () =>
+      Object.fromEntries((teachers ?? []).map((t) => [t.id, t])) as Record<string, TeacherSummary>,
+    [teachers],
+  );
+  if (loading || error || !program)
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-start justify-center px-6 py-32">
-        <SectionEyebrow>Oferta educativa</SectionEyebrow>
-        <h1 className="mt-3 text-3xl font-bold text-ink">Programa no disponible todavía</h1>
-        <p className="mt-4 text-muted">
-          Este programa aún no tiene contenido publicado. Vuelve pronto o consulta la Ingeniería en
-          Sistemas Computacionales.
-        </p>
+      <div className="page-width section-space">
+        <ContentStatus
+          loading={loading}
+          error={error}
+          empty={!program}
+          noun="el programa académico"
+        />
       </div>
     );
-  }
-
-  const graduateProfile = program.graduateProfile;
-
   return (
-    <div>
-      <section className="relative flex min-h-[60svh] flex-col items-center justify-center overflow-hidden bg-deep px-6 py-24 text-center text-surface">
-        {showOrb && (
-          <div className="absolute inset-0 opacity-60">
-            <Suspense fallback={null}>
-              <CircuitOrb />
-            </Suspense>
+    <div className="interior-page program-page">
+      <PageBanner
+        eyebrow="La carrera"
+        title={program.slug === 'isc' ? 'Ingeniería en Sistemas Computacionales' : program.name}
+        imageUrl={
+          (config && siteConfigValue<string>(config, 'ofertaEducativa.heroImageUrl')) ||
+          '/images/desarrollo.jpg'
+        }
+        imageAlt="Fotografía editorial de un espacio de desarrollo de software"
+      />
+      <nav className="program-nav" aria-label="Explora el programa">
+        <div className="page-width">
+          <a href="#programa">
+            El programa <ArrowDown size={14} />
+          </a>
+          <a href="#perfiles">
+            Tu perfil <ArrowDown size={14} />
+          </a>
+          <a href="#reticula">
+            Plan de estudios <ArrowDown size={14} />
+          </a>
+          <Link to="/especialidades">
+            Especialidades <ArrowUpRight size={14} />
+          </Link>
+        </div>
+      </nav>
+      <section id="programa" className="page-width section-space">
+        <Reveal className="program-opening">
+          <div>
+            <p className="section-kicker">CONOCE TU CARRERA</p>
+            <h2>
+              De la primera idea
+              <br />a lo que puedes crear.
+            </h2>
           </div>
-        )}
-        <Reveal className="relative">
-          {program.slug === 'isc' && (
-            <div className="mx-auto mb-6 inline-flex rounded-lg bg-surface px-5 py-3">
-              <img src="/logos/isc-logo.png" alt="Logo de ISC" className="h-10 w-auto" />
-            </div>
-          )}
-          <SectionEyebrow tone="light">Oferta educativa</SectionEyebrow>
-          <h1 className="mt-3 max-w-3xl text-3xl font-bold sm:text-5xl">{program.name}</h1>
+          <div className="program-brand">
+            <span className="degree-logo">
+              <CareerLogo />
+            </span>
+            <p>
+              INGENIERÍA EN SISTEMAS
+              <br />
+              COMPUTACIONALES
+            </p>
+          </div>
         </Reveal>
-      </section>
-
-      <section className="mx-auto max-w-4xl px-6 py-20">
-        <Reveal>
-          <SectionEyebrow>Video de presentación</SectionEyebrow>
-          {program.videoUrl ? (
-            <div className="mt-4 aspect-video overflow-hidden rounded-lg bg-elevated">
+        {program.videoUrl && (
+          <Reveal className="program-video">
+            <p className="section-kicker">
+              <Play size={14} /> CONOCE EL PROGRAMA
+            </p>
+            <div className="aspect-video">
               <iframe
                 src={toYoutubeEmbedUrl(program.videoUrl)}
                 title={`Video institucional de ${program.name}`}
@@ -80,65 +103,79 @@ export default function OfertaEducativa() {
                 allowFullScreen
               />
             </div>
-          ) : (
-            <div className="mt-4 flex aspect-video items-center justify-center rounded-lg border border-dashed border-line bg-elevated text-sm text-muted">
-              Video institucional próximamente
-            </div>
-          )}
-        </Reveal>
-
-        <div className="mt-16 grid gap-10 sm:grid-cols-2">
-          <Reveal>
-            <h2 className="text-lg font-bold text-ink">Misión</h2>
-            <p className="mt-2 text-sm text-muted">{program.mission}</p>
-          </Reveal>
-          <Reveal delayMs={80}>
-            <h2 className="text-lg font-bold text-ink">Visión</h2>
-            <p className="mt-2 text-sm text-muted">{program.vision}</p>
-          </Reveal>
-        </div>
-
-        <Reveal className="mt-16">
-          <h2 className="text-lg font-bold text-ink">Metas y objetivos</h2>
-          <p className="mt-2 text-sm text-muted">{program.goals}</p>
-        </Reveal>
-
-        <Reveal className="mt-16">
-          <h2 className="text-lg font-bold text-ink">Perfil de ingreso</h2>
-          <p className="mt-2 text-sm text-muted">{program.admissionProfile}</p>
-        </Reveal>
-
-        {graduateProfile.length > 0 && (
-          <Reveal className="mt-16">
-            <h2 className="text-lg font-bold text-ink">Atributos de egreso</h2>
-            <ol className="mt-3 flex list-decimal flex-col gap-2 pl-5 text-sm text-muted marker:font-mono marker:text-signal">
-              {graduateProfile.map((attribute) => (
-                <li key={attribute}>{attribute}</li>
-              ))}
-            </ol>
           </Reveal>
         )}
-
-        <Reveal className="mt-16">
-          <h2 className="text-lg font-bold text-ink">Campo de acción</h2>
-          <p className="mt-2 text-sm text-muted">{program.actionField}</p>
+        <Reveal>
+          <SystemsExplorer subjects={subjects ?? []} />
+        </Reveal>
+        <Reveal className="program-goals">
+          <span className="section-kicker">EL HORIZONTE</span>
+          <h2>Metas y objetivos.</h2>
+          <p>{program.goals}</p>
+        </Reveal>
+        <Reveal className="program-profiles">
+          <div id="perfiles">
+            <p className="section-kicker">TU TRAYECTORIA</p>
+            <h2>Descubre tu potencial.</h2>
+          </div>
+          <ProfileTabs
+            admissionProfile={program.admissionProfile}
+            graduateProfile={program.graduateProfile}
+            actionField={program.actionField}
+          />
         </Reveal>
       </section>
-
-      <section id="reticula" className="border-t border-line bg-elevated px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          <Reveal>
-            <SectionEyebrow>Retícula</SectionEyebrow>
-            <h2 className="mt-2 text-2xl font-bold text-ink">Plan de estudios</h2>
-            <p className="mt-2 max-w-2xl text-sm text-muted">
-              Pasa el mouse sobre una materia para ver sus prerrequisitos, o haz click para conocer el
-              detalle completo.
+      <section id="reticula" className="curriculum-section">
+        <div className="page-width">
+          <Reveal className="section-heading">
+            <div>
+              <p className="section-kicker">CONSTRUYE TU CAMINO</p>
+              <h2>Plan de estudios.</h2>
+            </div>
+            <p>
+              Explora cada semestre y selecciona una materia
+              <br />
+              para conocer su carga académica, prerrequisitos y docentes.
             </p>
           </Reveal>
-          <Reveal delayMs={100} className="mt-10">
-            <CircuitBoard subjects={subjects ?? []} teachersById={teachersById} />
+          <Reveal className="mb-8 flex flex-wrap gap-4">
+            {program.reticulaPdf && (
+              <a
+                className="inline-flex items-center gap-2 rounded border border-primary/40 px-5 py-3 text-primary hover:bg-primary/10"
+                href={
+                  program.reticulaPdf.url ===
+                  'https://dsc.itmorelia.edu.mx/web/documentos/reticula_isc.pdf'
+                    ? '/documents/isc/reticula-isc.pdf'
+                    : program.reticulaPdf.url
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Download size={18} /> Descargar retícula PDF
+              </a>
+            )}
+          </Reveal>
+          <Reveal>
+            <SemesterReticula subjects={subjects ?? []} teachersById={teachersById} />
           </Reveal>
         </div>
+      </section>
+      <section className="page-width section-space">
+        <Reveal className="program-goals">
+          <p className="section-kicker">CONTINÚA TU FORMACIÓN</p>
+          <h2>Maestría en Sistemas Computacionales.</h2>
+          <p>
+            Conoce el programa de posgrado, sus líneas de investigación y el proceso de admisión.
+          </p>
+          <a
+            className="mt-6 inline-flex items-center gap-2 text-primary hover:underline"
+            href="https://mscitmorelia.com.mx/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Explorar la maestría <ArrowUpRight size={18} />
+          </a>
+        </Reveal>
       </section>
     </div>
   );

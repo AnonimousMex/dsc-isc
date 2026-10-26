@@ -1,28 +1,35 @@
-import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
+import TiltSurface from '../motion/TiltSurface';
 import type { TeacherSummary } from '@dsc-isc/shared';
 import TeacherAvatar from './TeacherAvatar';
-
-interface TeacherCardProps {
+export default function TeacherCard({
+  teacher,
+  onOpenDetail,
+}: {
   teacher: TeacherSummary;
-}
-
-export default function TeacherCard({ teacher }: TeacherCardProps) {
+  onOpenDetail: (slug: string) => void;
+}) {
   return (
-    <Link
-      to={`/docentes/${teacher.slug}`}
-      className="group block overflow-hidden rounded-lg border border-line bg-surface transition-shadow hover:shadow-md"
+    <button
+      type="button"
+      className="faculty-card"
+      onClick={() => onOpenDetail(teacher.slug)}
+      aria-label={`Conocer a ${teacher.fullName}`}
     >
-      <div className="aspect-square w-full overflow-hidden">
-        <TeacherAvatar
-          fullName={teacher.fullName}
-          photo={teacher.photo}
-          className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-        />
+      <TiltSurface className="faculty-portrait" strength={10}>
+        <TeacherAvatar fullName={teacher.fullName} photo={teacher.photo} />
+        <span className="faculty-open">
+          <ArrowUpRight size={23} />
+        </span>
+      </TiltSurface>
+      <div className="faculty-card-copy">
+        <p className="section-kicker">{teacher.specialty ?? 'DOCENTE / ISC'}</p>
+        <h3>{teacher.fullName}</h3>
+        <p>{teacher.title}</p>
+        <span>
+          Materias y contacto <ArrowUpRight size={15} />
+        </span>
       </div>
-      <div className="p-4">
-        <h2 className="font-semibold text-ink group-hover:text-primary">{teacher.fullName}</h2>
-        <p className="mt-1 text-xs text-muted">{teacher.title}</p>
-      </div>
-    </Link>
+    </button>
   );
 }

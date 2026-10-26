@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Facebook, Globe, Linkedin, Mail, Play, Twitter } from 'lucide-react';
+import TeacherArticlesSection from '../components/docentes/TeacherArticlesSection';
 import TeacherAvatar from '../components/docentes/TeacherAvatar';
 import VideoModal from '../components/docentes/VideoModal';
 import Reveal from '../components/shared/Reveal';
@@ -36,8 +37,11 @@ export default function DocenteDetalle() {
   ].filter((link) => Boolean(link.href));
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-24">
-      <Reveal>
+    <div className="detail-editorial page-width">
+      <Link to="/docentes" className="text-sm text-accent underline">
+        ← Docentes
+      </Link>
+      <Reveal className="mt-4">
         <SectionEyebrow>Docentes</SectionEyebrow>
       </Reveal>
 
@@ -53,7 +57,7 @@ export default function DocenteDetalle() {
             <TeacherAvatar fullName={teacher.fullName} photo={teacher.photo} />
             {teacher.youtubeUrl && (
               <span className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors group-hover:bg-ink/40">
-                <Play className="h-10 w-10 text-surface opacity-0 transition-opacity group-hover:opacity-100" />
+                <Play className="h-10 w-10 text-ink opacity-0 transition-opacity group-hover:opacity-100" />
               </span>
             )}
           </button>
@@ -94,13 +98,18 @@ export default function DocenteDetalle() {
           <h2 className="text-lg font-bold text-ink">Materias que imparte</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {subjects.map((subject) => (
-              <span key={subject.id} className="rounded-full border border-line px-3 py-1 text-xs text-ink">
+              <span
+                key={subject.id}
+                className="rounded-full border border-line px-3 py-1 text-xs text-ink"
+              >
                 {subject.code} · {subject.name}
               </span>
             ))}
           </div>
         </Reveal>
       )}
+
+      <TeacherArticlesSection slug={teacher.slug} hasOpenAlexLink={Boolean(teacher.openAlexId)} />
 
       {videoOpen && teacher.youtubeUrl && (
         <VideoModal

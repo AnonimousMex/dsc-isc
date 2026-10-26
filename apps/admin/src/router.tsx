@@ -16,6 +16,7 @@ import Noticias from './pages/Noticias';
 import Configuracion from './pages/Configuracion';
 import Usuarios from './pages/Usuarios';
 import Auditoria from './pages/Auditoria';
+import Egresados from './pages/Egresados';
 import { AuthGate, RequireAuth, RequireAuthOnly, RequireRole } from './router/guards';
 
 export const router = createBrowserRouter([
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
               { path: '/noticias', element: <Noticias /> },
               { path: '/configuracion', element: <Configuracion /> },
               { path: '/403', element: <Forbidden /> },
+              {
+                element: <RequireRole roles={['SUPERADMIN', 'EDITOR']} />,
+                children: [{ path: '/egresados', element: <Egresados /> }],
+              },
               {
                 element: <RequireRole roles={['SUPERADMIN']} />,
                 children: [

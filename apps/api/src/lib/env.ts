@@ -24,4 +24,9 @@ export const env = {
     password: process.env.SMTP_PASSWORD,
     from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
   },
+  // Identifica la app ante OpenAlex (su "polite pool": límites de uso más
+  // altos y estables para quien se identifica). Sin esto, las consultas de
+  // artículos de docentes siguen funcionando pero con menor prioridad.
+  // https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication
+  openAlexMailto: process.env.OPENALEX_MAILTO,
 };

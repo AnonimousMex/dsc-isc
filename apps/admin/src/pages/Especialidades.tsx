@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { specialtySchema, type Specialty } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
+import HeroImageField from '../components/HeroImageField';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
@@ -80,6 +81,8 @@ export default function Especialidades() {
         <h1 className="text-2xl font-bold text-ink">Especialidades</h1>
         <Button onClick={openCreate}>Nueva especialidad</Button>
       </div>
+
+      <HeroImageField configKey="especialidades.heroImageUrl" />
 
       <div className="mt-6">
         <DataTable

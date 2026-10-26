@@ -21,6 +21,7 @@ import { subjectsRouter } from './routes/subjects.js';
 import { teachersRouter } from './routes/teachers.js';
 import { timelineRouter } from './routes/timeline.js';
 import { usersRouter } from './routes/users.js';
+import { graduatesRouter } from './routes/graduates.js';
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use('/api/documents', documentsRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/community-sections', communityRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/graduates', graduatesRouter);
 app.use('/api/audit-logs', auditLogsRouter);
 
 app.use(errorHandler);

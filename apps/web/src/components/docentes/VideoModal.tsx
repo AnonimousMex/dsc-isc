@@ -50,7 +50,7 @@ export default function VideoModal({ youtubeUrl, title, onClose }: VideoModalPro
           type="button"
           onClick={onClose}
           aria-label="Cerrar video"
-          className="absolute right-6 top-6 rounded p-2 text-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
+          className="absolute right-6 top-6 rounded p-2 text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
         >
           ✕
         </button>

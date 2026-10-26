@@ -1,16 +1,8 @@
 interface SectionEyebrowProps {
   children: string;
-  tone?: 'light' | 'dark';
 }
 
-export default function SectionEyebrow({ children, tone = 'dark' }: SectionEyebrowProps) {
-  return (
-    <p
-      className={`font-mono text-xs font-medium uppercase tracking-[0.2em] ${
-        tone === 'light' ? 'text-signal' : 'text-accent'
-      }`}
-    >
-      {children}
-    </p>
-  );
+/** Etiqueta mono en mayúsculas — ver `.label-mono` en index.css. */
+export default function SectionEyebrow({ children }: SectionEyebrowProps) {
+  return <p className="label-mono">{children}</p>;
 }
