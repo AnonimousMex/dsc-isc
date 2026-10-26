@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { resizeImageUrl } from '@dsc-isc/shared';
 import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
@@ -21,8 +21,11 @@ export default function LaboratorioDetalle() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-24">
-      <Reveal>
+    <div className="detail-editorial page-width">
+      <Link to="/laboratorios" className="text-sm text-accent underline">
+        ← Laboratorios
+      </Link>
+      <Reveal className="mt-4">
         <SectionEyebrow>Laboratorios</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">{lab.name}</h1>
         <p className="mt-4 text-muted">{lab.description}</p>
@@ -61,7 +64,10 @@ export default function LaboratorioDetalle() {
           <h2 className="text-lg font-bold text-ink">Materias que se imparten aquí</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {lab.relatedSubjects.map((name) => (
-              <span key={name} className="rounded-full border border-line px-3 py-1 text-xs text-ink">
+              <span
+                key={name}
+                className="rounded-full border border-line px-3 py-1 text-xs text-ink"
+              >
                 {name}
               </span>
             ))}

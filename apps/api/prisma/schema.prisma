@@ -117,6 +117,7 @@ model MediaAsset {
   specialties Specialty[]
   documents  Document[]
   news       News[]
+  subjectSyllabi Subject[] @relation("subjectSyllabus")
 }
 
 model HeroSlide {
@@ -160,6 +161,15 @@ model Subject {
   code          String                 @unique
   name          String
   semester      Int
+  // Créditos SATCA de la materia. Opcional: no todas las materias
+  // capturadas históricamente lo tienen cargado todavía.
+  credits       Int?
+  theoryHours   Int?
+  practicalHours Int?
+  academicSourceUrl String?
+  prerequisitesVerified Boolean @default(false)
+  syllabusMediaId String?
+  syllabus MediaAsset? @relation("subjectSyllabus", fields: [syllabusMediaId], references: [id], onDelete: SetNull)
   objective     String
   program       Program                @relation(fields: [programId], references: [id])
   programId     String
@@ -203,6 +213,9 @@ model Teacher {
   // caliente (ver openAlexService.ts), porque un nombre no identifica de
   // forma única a un investigador.
   openAlexId String?
+  // Specialty: una de TEACHER_SPECIALTIES (packages/shared) — se deja como
+  // String (no enum nativo) por la misma razón que el resto del esquema.
+  specialty  String?
   isActive   Boolean          @default(true)
   subjects   TeacherSubject[]
 }

@@ -14,6 +14,7 @@ function toDto(row: TeacherRow): Teacher {
     fullName: row.fullName,
     title: row.title,
     photo: row.photo ? toMediaAssetDto(row.photo) : null,
+    specialty: row.specialty,
     isActive: row.isActive,
     bio: row.bio,
     experience: row.experience,
@@ -35,6 +36,7 @@ function toSummaryDto(row: TeacherRow): TeacherSummary {
     fullName: row.fullName,
     title: row.title,
     photo: row.photo ? toMediaAssetDto(row.photo) : null,
+    specialty: row.specialty,
     isActive: row.isActive,
   };
 }
@@ -95,6 +97,7 @@ export async function createTeacher(input: TeacherInput): Promise<Teacher> {
       facebook: input.facebook || null,
       twitter: input.twitter || null,
       openAlexId: input.openAlexId || null,
+      specialty: input.specialty || null,
       isActive: input.isActive,
     },
   });
@@ -120,6 +123,7 @@ export async function updateTeacher(id: string, input: TeacherInput): Promise<Te
       facebook: input.facebook || null,
       twitter: input.twitter || null,
       openAlexId: input.openAlexId || null,
+      specialty: input.specialty || null,
       isActive: input.isActive,
     },
   });

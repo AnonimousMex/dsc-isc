@@ -11,7 +11,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       href={article.url}
       target="_blank"
       rel="noreferrer"
-      className="group block rounded-lg border border-line bg-surface p-4 transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
+      className="card-interactive group block p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-semibold text-ink group-hover:text-primary">{article.title}</h3>

@@ -1,20 +1,39 @@
 import { useEffect, useState } from 'react';
 import { ZodError } from 'zod';
 import { subjectSchema, type Program, type Subject } from '@dsc-isc/shared';
+import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
 import MultiSelect from '../components/MultiSelect';
 import { Button } from '../components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 import { apiDelete, apiGet, apiPost, apiPut, ApiError } from '../lib/apiClient';
 
 const emptyForm = {
   code: '',
   name: '',
   semester: 1,
+  credits: '',
+  theoryHours: '',
+  practicalHours: '',
+  academicSourceUrl: '',
+  prerequisitesVerified: false,
+  syllabus: null as MediaValue | null,
   objective: '',
   programId: '',
   prerequisiteIds: [] as string[],
@@ -58,6 +77,12 @@ export default function Materias() {
       code: subject.code,
       name: subject.name,
       semester: subject.semester,
+      credits: subject.credits != null ? String(subject.credits) : '',
+      theoryHours: subject.theoryHours != null ? String(subject.theoryHours) : '',
+      practicalHours: subject.practicalHours != null ? String(subject.practicalHours) : '',
+      academicSourceUrl: subject.academicSourceUrl ?? '',
+      prerequisitesVerified: subject.prerequisitesVerified ?? false,
+      syllabus: subject.syllabus ? { id: subject.syllabus.id, url: subject.syllabus.url } : null,
       objective: subject.objective,
       programId: subject.programId,
       prerequisiteIds: subject.prerequisiteIds,
@@ -68,11 +93,21 @@ export default function Materias() {
 
   const handleSubmit = async () => {
     setError(null);
-    const payload = { ...form, semester: Number(form.semester) };
+    const payload = {
+      ...form,
+      theoryHours: form.theoryHours.trim() ? Number(form.theoryHours) : null,
+      practicalHours: form.practicalHours.trim() ? Number(form.practicalHours) : null,
+      academicSourceUrl: form.academicSourceUrl.trim() || null,
+      syllabusMediaId: form.syllabus?.id ?? null,
+      semester: Number(form.semester),
+      credits: form.credits.trim() ? Number(form.credits) : null,
+    };
     try {
       subjectSchema.parse(payload);
     } catch (err) {
-      setError(err instanceof ZodError ? (err.issues[0]?.message ?? 'Datos inválidos') : 'Datos inválidos');
+      setError(
+        err instanceof ZodError ? (err.issues[0]?.message ?? 'Datos inválidos') : 'Datos inválidos',
+      );
       return;
     }
     try {
@@ -105,8 +140,8 @@ export default function Materias() {
         <div>
           <h1 className="text-2xl font-bold text-ink">Materias y retícula</h1>
           <p className="mt-1 text-sm text-muted">
-            Los prerrequisitos se validan en el servidor: no se puede guardar una relación que cree un
-            ciclo (una materia que dependa, directa o indirectamente, de sí misma).
+            Los prerrequisitos se validan en el servidor: no se puede guardar una relación que cree
+            un ciclo (una materia que dependa, directa o indirectamente, de sí misma).
           </p>
         </div>
         <Button onClick={openCreate}>Nueva materia</Button>
@@ -119,7 +154,10 @@ export default function Materias() {
           emptyMessage={loading ? 'Cargando…' : 'Aún no hay materias.'}
           columns={[
             { header: 'Código', cell: (s) => <span className="font-mono text-xs">{s.code}</span> },
-            { header: 'Nombre', cell: (s) => <span className="font-medium text-ink">{s.name}</span> },
+            {
+              header: 'Nombre',
+              cell: (s) => <span className="font-medium text-ink">{s.name}</span>,
+            },
             { header: 'Semestre', cell: (s) => s.semester },
             { header: 'Programa', cell: (s) => programName(s.programId) },
             { header: 'Prerrequisitos', cell: (s) => s.prerequisiteIds.length },
@@ -144,7 +182,9 @@ export default function Materias() {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([semester, items]) => (
               <div key={semester} className="rounded-lg border border-line bg-surface p-4">
-                <p className="font-mono text-xs uppercase tracking-widest text-muted">Semestre {semester}</p>
+                <p className="font-mono text-xs uppercase tracking-widest text-muted">
+                  Semestre {semester}
+                </p>
                 <div className="mt-3 flex flex-col gap-3">
                   {items.map((s) => (
                     <div key={s.id} className="rounded-md border border-line p-3">
@@ -154,7 +194,10 @@ export default function Materias() {
                       {s.prerequisiteIds.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {s.prerequisiteIds.map((id) => (
-                            <span key={id} className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted">
+                            <span
+                              key={id}
+                              className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted"
+                            >
                               {subjectLabel(id)}
                             </span>
                           ))}
@@ -178,7 +221,11 @@ export default function Materias() {
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="code">Código</Label>
-                <Input id="code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
+                <Input
+                  id="code"
+                  value={form.code}
+                  onChange={(e) => setForm({ ...form, code: e.target.value })}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="semester">Semestre</Label>
@@ -194,8 +241,61 @@ export default function Materias() {
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <Label htmlFor="credits">Créditos (opcional)</Label>
+              <Input
+                id="credits"
+                type="number"
+                min={0}
+                max={60}
+                value={form.credits}
+                onChange={(e) => setForm({ ...form, credits: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {(['theoryHours', 'practicalHours'] as const).map((field) => (
+                <div key={field} className="flex flex-col gap-1.5">
+                  <Label htmlFor={field}>
+                    {field === 'theoryHours' ? 'Horas teóricas' : 'Horas prácticas'}
+                  </Label>
+                  <Input
+                    id={field}
+                    type="number"
+                    min={0}
+                    max={40}
+                    value={form[field]}
+                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted">
+              Horas semanales según la retícula. Deja vacío lo que aún no esté confirmado.
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="academicSourceUrl">Fuente de la información académica</Label>
+              <Input
+                id="academicSourceUrl"
+                type="url"
+                placeholder="https://..."
+                value={form.academicSourceUrl}
+                onChange={(e) => setForm({ ...form, academicSourceUrl: e.target.value })}
+              />
+            </div>
+            <ImageUploader
+              kind="DOCUMENT"
+              label="Temario o programa de la materia (PDF)"
+              value={form.syllabus}
+              onChange={(syllabus) => setForm({ ...form, syllabus })}
+            />
+
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="name">Nombre</Label>
-              <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -211,7 +311,10 @@ export default function Materias() {
 
             <div className="flex flex-col gap-1.5">
               <Label>Programa</Label>
-              <Select value={form.programId} onValueChange={(programId) => setForm({ ...form, programId })}>
+              <Select
+                value={form.programId}
+                onValueChange={(programId) => setForm({ ...form, programId })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un programa" />
                 </SelectTrigger>
@@ -235,6 +338,15 @@ export default function Materias() {
                 onChange={(prerequisiteIds) => setForm({ ...form, prerequisiteIds })}
               />
             </div>
+
+            <label className="flex items-start gap-3 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={form.prerequisitesVerified}
+                onChange={(e) => setForm({ ...form, prerequisitesVerified: e.target.checked })}
+              />
+              Prerrequisitos revisados y confirmados por la coordinación académica
+            </label>
 
             {error && (
               <p role="alert" className="text-sm text-red-600">

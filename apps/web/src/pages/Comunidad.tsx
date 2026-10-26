@@ -1,62 +1,93 @@
-import { lazy } from 'react';
+import { useMotionSettings } from '../components/motion/MotionExperience';
+import { ArrowUpRight } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import Reveal from '../components/shared/Reveal';
-import SectionHero3D from '../components/shared/SectionHero3D';
-import { api } from '../lib/apiClient';
+import { AnimatePresence, motion } from 'framer-motion';
+import PageBanner from '../components/shared/PageBanner';
+import { ContentStatus, EditorialIntro } from '../components/shared/Editorial';
+import { api, siteConfigValue } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
-
-const CommunityCluster = lazy(() => import('../components/three/CommunityCluster'));
 
 export default function Comunidad() {
   const { seccion } = useParams<{ seccion?: string }>();
-  const { data: sections, loading } = useApiData(() => api.communitySections(), []);
-
-  const active = seccion ? (sections ?? []).find((s) => s.slug === seccion) : (sections ?? [])[0];
-
+  const { data: sections, loading, error } = useApiData(() => api.communitySections(), []);
+  const { data: config } = useApiData(() => api.siteConfig(), []);
+  const { enabled } = useMotionSettings();
+  const reduced = !enabled;
+  const active = seccion ? sections?.find((s) => s.slug === seccion) : sections?.[0];
   return (
-    <div>
-      <SectionHero3D
+    <div className="interior-page community-page">
+      <PageBanner
         eyebrow="Comunidad"
-        title="Comunidad estudiantil"
-        description="Residencias profesionales, investigación y créditos complementarios para estudiantes en curso."
-        scene={CommunityCluster}
+        title="Tu talento. Nuestra comunidad."
+        imageUrl={
+          (config && siteConfigValue<string>(config, 'comunidad.heroImageUrl')) ||
+          '/images/comunidad.jpg'
+        }
+        imageAlt="Fotografía editorial de un equipo colaborando"
       />
-
-      <div className="mx-auto max-w-4xl px-6 py-20">
-        {sections && sections.length > 0 && (
-          <Reveal className="flex flex-wrap gap-2 border-b border-line pb-4">
-            {sections.map((section) => (
-              <Link
-                key={section.id}
-                to={`/comunidad/${section.slug}`}
-                className={`rounded-full border px-4 py-2 text-sm ${
-                  active?.slug === section.slug
-                    ? 'border-primary bg-primary text-surface'
-                    : 'border-line text-muted hover:border-primary hover:text-primary'
-                }`}
-              >
-                {section.title}
-              </Link>
-            ))}
-          </Reveal>
+      <section className="page-width section-space">
+        <EditorialIntro title="Aprender también es conectar.">
+          <p>
+            Residencias profesionales, investigación y créditos complementarios. Encuentra lo que
+            necesitas para seguir avanzando.
+          </p>
+        </EditorialIntro>
+        <ContentStatus
+          loading={loading}
+          error={error}
+          empty={!sections?.length}
+          noun="los recursos de la comunidad"
+        />
+        {!!sections?.length && (
+          <div className="community-workspace">
+            <nav aria-label="Recursos de la comunidad" className="community-sidebar">
+              <p className="section-kicker">ELIGE TU SIGUIENTE PASO</p>
+              {sections.map((section) => (
+                <Link
+                  key={section.id}
+                  to={`/comunidad/${section.slug}`}
+                  className={active?.id === section.id ? 'selected' : ''}
+                  aria-current={active?.id === section.id ? 'page' : undefined}
+                >
+                  {section.title}
+                  <ArrowUpRight size={18} />
+                </Link>
+              ))}
+              <div className="community-aside-image">
+                <img
+                  src="/images/desarrollo.jpg"
+                  alt="Fotografía editorial de herramientas de programación"
+                  loading="lazy"
+                />
+              </div>
+            </nav>
+            <div className="community-article">
+              <AnimatePresence mode="wait">
+                {active ? (
+                  <motion.article
+                    key={active.id}
+                    initial={{ opacity: 0, y: reduced ? 0 : 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: reduced ? 0 : 0.25 }}
+                  >
+                    <p className="section-kicker">COMUNIDAD / SISTEMAS</p>
+                    <h2>{active.title}</h2>
+                    <div
+                      className="prose prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{ __html: active.body }}
+                    />
+                  </motion.article>
+                ) : (
+                  <p className="content-status">
+                    Este recurso no está disponible. Selecciona otra sección.
+                  </p>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         )}
-
-        <div className="mt-8">
-          {!loading && (!sections || sections.length === 0) && (
-            <p className="text-sm text-muted">Aún no hay contenido publicado en esta sección.</p>
-          )}
-          {active && (
-            <Reveal key={active.id}>
-              <h2 className="text-xl font-bold text-ink">{active.title}</h2>
-              {/* Contenido saneado en el servidor (DOMPurify) antes de guardarse. */}
-              <div
-                className="prose prose-sm mt-4 max-w-none text-muted"
-                dangerouslySetInnerHTML={{ __html: active.body }}
-              />
-            </Reveal>
-          )}
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

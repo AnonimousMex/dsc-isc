@@ -6,7 +6,14 @@ export default {
   presets: [sharedPreset as Config],
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        elevated: '#111715',
+        surface: '#19221d',
+        muted: '#9aa99f',
+        line: 'rgb(48 65 55 / <alpha-value>)',
+      },
+    },
   },
   plugins: [typography],
 } satisfies Config;

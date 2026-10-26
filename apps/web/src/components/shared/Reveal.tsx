@@ -1,9 +1,12 @@
+import { usePresentation } from '../../lib/PresentationContext';
+import { useMotionSettings } from '../motion/MotionExperience';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 interface RevealProps {
   children: ReactNode;
   className?: string;
   delayMs?: number;
+  direction?: 'up' | 'left' | 'right';
 }
 
 /**
@@ -11,7 +14,15 @@ interface RevealProps {
  * re-anima al re-scrollear. Si prefers-reduced-motion está activo, se
  * muestra directo en su estado final sin observar el scroll.
  */
-export default function Reveal({ children, className = '', delayMs = 0 }: RevealProps) {
+export default function Reveal({
+  children,
+  className = '',
+  delayMs = 0,
+  direction = 'up',
+}: RevealProps) {
+  const { motion } = usePresentation();
+  const { enabled: playing } = useMotionSettings();
+  const enabled = playing && motion.reveal;
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -19,7 +30,7 @@ export default function Reveal({ children, className = '', delayMs = 0 }: Reveal
     const node = ref.current;
     if (!node) return;
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!enabled) {
       setVisible(true);
       return;
     }
@@ -32,17 +43,21 @@ export default function Reveal({ children, className = '', delayMs = 0 }: Reveal
           observer.disconnect();
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0, rootMargin: '0px 0px -40px 0px' },
     );
     observer.observe(node);
     return () => {
       observer.disconnect();
       clearTimeout(timeout);
     };
-  }, [delayMs]);
+  }, [delayMs, enabled]);
 
   return (
-    <div ref={ref} className={`reveal ${visible ? 'is-visible' : ''} ${className}`}>
+    <div
+      ref={ref}
+      data-reveal={direction}
+      className={`reveal ${visible ? 'is-visible' : ''} ${className}`}
+    >
       {children}
     </div>
   );

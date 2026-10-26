@@ -22,7 +22,12 @@ interface ImageUploaderProps {
  * (se guarda en apps/api/storage/uploads/ vía el StorageAdapter activo) o
  * pegar un enlace externo (se guarda tal cual, sin descargarlo).
  */
-export default function ImageUploader({ value, onChange, kind = 'IMAGE', label = 'Imagen' }: ImageUploaderProps) {
+export default function ImageUploader({
+  value,
+  onChange,
+  kind = 'IMAGE',
+  label = 'Imagen',
+}: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [externalUrl, setExternalUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -84,6 +89,7 @@ export default function ImageUploader({ value, onChange, kind = 'IMAGE', label =
         <TabsContent value="upload">
           <input
             ref={fileInputRef}
+            aria-label={`${label}: subir archivo`}
             type="file"
             accept={kind === 'IMAGE' ? 'image/*' : kind === 'VIDEO' ? 'video/*' : 'application/pdf'}
             onChange={handleFileChange}
@@ -94,6 +100,7 @@ export default function ImageUploader({ value, onChange, kind = 'IMAGE', label =
         <TabsContent value="link">
           <div className="flex gap-2">
             <Input
+              aria-label={`${label}: enlace externo`}
               type="url"
               placeholder="https://..."
               value={externalUrl}

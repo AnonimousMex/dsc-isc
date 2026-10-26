@@ -1,0 +1,291 @@
+{
+  "plan": "ISIC-2010-224 (2017)",
+  "sourceUrl": "https://dsc.itmorelia.edu.mx/web/documentos/reticula_isc.pdf",
+  "downloadPath": "/documents/isc/reticula-isc.pdf",
+  "sha256": "5a3140cdca66dc190aed7185ac8db016e23b5a335e248408899d92206a11a60a",
+  "verifiedOn": "2026-10-26",
+  "notes": [
+    "Tripletas de la retícula: horas teóricas, horas prácticas y créditos.",
+    "El PDF abrevia el código de Matemáticas Discretas como AEF-104; se conserva AEF-1041 del catálogo existente, cotejando el nombre y la celda.",
+    "No se importan prerrequisitos, docentes ni temarios: el PDF no permite verificarlos.",
+    "No se modifica el semestre, el objetivo ni el nombre de las materias existentes."
+  ],
+  "subjects": [
+    {
+      "code": "ACF-0901",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "ACF-0902",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "ACF-0904",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "ACF-0905",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1010",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCD-1015",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCD-1016",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1019",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCC-1012",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "AED-1285",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "AED-1286",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "AED-1026",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1017",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "AEC-1034",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCD-1021",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCD-1004",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCA-1002",
+      "theoryHours": 0,
+      "practicalHours": 4,
+      "credits": 4
+    },
+    {
+      "code": "ACA-0907",
+      "theoryHours": 0,
+      "practicalHours": 4,
+      "credits": 4
+    },
+    {
+      "code": "AEC-1008",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCC-1005",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCD-1027",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "AEC-1061",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCA-1026",
+      "theoryHours": 0,
+      "practicalHours": 4,
+      "credits": 4
+    },
+    {
+      "code": "ACA-0909",
+      "theoryHours": 0,
+      "practicalHours": 4,
+      "credits": 4
+    },
+    {
+      "code": "ACA-0910",
+      "theoryHours": 0,
+      "practicalHours": 4,
+      "credits": 4
+    },
+    {
+      "code": "AEF-1041",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "AEC-1058",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "ACD-0908",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "AEF-1031",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "SCA-1025",
+      "theoryHours": 0,
+      "practicalHours": 4,
+      "credits": 4
+    },
+    {
+      "code": "SCB-1001",
+      "theoryHours": 1,
+      "practicalHours": 4,
+      "credits": 5
+    },
+    {
+      "code": "SCG-1009",
+      "theoryHours": 3,
+      "practicalHours": 3,
+      "credits": 6
+    },
+    {
+      "code": "SCH-1024",
+      "theoryHours": 1,
+      "practicalHours": 3,
+      "credits": 4
+    },
+    {
+      "code": "ACF-0903",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1013",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCD-1022",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1007",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "SCD-1011",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "ACC-0906",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "AEF-1052",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "SCF-1006",
+      "theoryHours": 3,
+      "practicalHours": 2,
+      "credits": 5
+    },
+    {
+      "code": "SCD-1018",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1023",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    },
+    {
+      "code": "AEB-1055",
+      "theoryHours": 1,
+      "practicalHours": 4,
+      "credits": 5
+    },
+    {
+      "code": "SCD-1003",
+      "theoryHours": 2,
+      "practicalHours": 3,
+      "credits": 5
+    },
+    {
+      "code": "SCC-1014",
+      "theoryHours": 2,
+      "practicalHours": 2,
+      "credits": 4
+    }
+  ]
+}

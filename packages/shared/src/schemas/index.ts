@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TEACHER_SPECIALTIES } from '../types/index.js';
 
 /**
  * Esquemas Zod para los payloads de escritura (create/update) de cada
@@ -110,6 +111,7 @@ export const teacherSchema = z.object({
     .nullable()
     .optional()
     .or(z.literal('')),
+  specialty: z.enum(TEACHER_SPECIALTIES).nullable().optional().or(z.literal('')),
   isActive: z.boolean().default(true),
   subjectIds: z.array(z.string()).default([]),
 });
@@ -118,6 +120,12 @@ export const subjectSchema = z.object({
   code: z.string().min(2).max(20),
   name: z.string().min(2).max(160),
   semester: z.number().int().min(1).max(20),
+  credits: z.number().int().min(0).max(60).nullable().optional(),
+  theoryHours: z.number().int().min(0).max(40).nullable().optional(),
+  practicalHours: z.number().int().min(0).max(40).nullable().optional(),
+  academicSourceUrl: z.string().url().refine(value => /^https?:\/\//.test(value), 'Usa un enlace HTTP o HTTPS.').nullable().optional(),
+  prerequisitesVerified: z.boolean().optional(),
+  syllabusMediaId: z.string().min(1).nullable().optional(),
   objective: z.string().max(2000),
   programId: z.string().min(1),
   prerequisiteIds: z.array(z.string()).default([]),

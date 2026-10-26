@@ -6,3 +6,5 @@ export * from './imageUrl.js';
 export * from './youtube.js';
 export * from './theme.js';
 export * from './graduates.js';
+
+export * from './presentation.js';

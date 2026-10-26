@@ -1,6 +1,7 @@
 import { createHash, randomInt, randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
+import { retryDatabaseRead } from '../lib/databaseConnection.js';
 import { hashPassword, verifyPassword } from '../lib/passwords.js';
 import {
   REFRESH_TOKEN_TTL_MS,
@@ -51,7 +52,7 @@ export async function login(
   password: string,
   totpCode?: string,
 ): Promise<LoginResult | TotpSetupRequired> {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await retryDatabaseRead(() => prisma.user.findUnique({ where: { email } }));
   const invalidCredentials = () => new HttpError(401, 'Correo o contraseña incorrectos');
 
   if (!user || !user.isActive) {

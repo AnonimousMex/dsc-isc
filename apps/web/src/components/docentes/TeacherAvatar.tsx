@@ -21,7 +21,7 @@ export default function TeacherAvatar({ fullName, photo, className = '' }: Teach
 
   return (
     <div
-      className={`flex h-full w-full items-center justify-center font-mono text-2xl font-bold text-surface ${className}`}
+      className={`flex h-full w-full items-center justify-center font-mono text-2xl font-bold text-ink ${className}`}
       style={{ backgroundColor: avatarColorFor(fullName) }}
       aria-hidden="true"
     >

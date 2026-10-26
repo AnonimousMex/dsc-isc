@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { documentSchema, type DscDocument } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
+import HeroImageField from '../components/HeroImageField';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
@@ -77,6 +78,8 @@ export default function Normateca() {
         <h1 className="text-2xl font-bold text-ink">Normateca</h1>
         <Button onClick={openCreate}>Nuevo documento</Button>
       </div>
+
+      <HeroImageField configKey="normateca.heroImageUrl" />
 
       <div className="mt-6">
         <DataTable

@@ -1,98 +1,117 @@
-import { useEffect, useState } from 'react';
-import { LayoutGrid, Rows3 } from 'lucide-react';
+import { EditorialIntro } from '../components/shared/Editorial';
+import { useState } from 'react';
+import { TEACHER_SPECIALTIES } from '@dsc-isc/shared';
 import TeacherCard from '../components/docentes/TeacherCard';
-import TeacherCardGrid from '../components/docentes/TeacherCardGrid';
+import TeacherModal from '../components/docentes/TeacherModal';
 import PageBanner from '../components/shared/PageBanner';
 import Reveal from '../components/shared/Reveal';
 import { api, siteConfigValue } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
 
-type DocentesView = 'galeria' | 'mosaico';
-
-const VIEW_STORAGE_KEY = 'dsc-isc:docentes-view';
-
 export default function Docentes() {
   const { data: teachers, loading } = useApiData(() => api.teachers(), []);
   const { data: config } = useApiData(() => api.siteConfig(), []);
-  const heroImageUrl = config ? siteConfigValue<string>(config, 'docentes.heroImageUrl') : undefined;
+  const heroImageUrl = config
+    ? siteConfigValue<string>(config, 'docentes.heroImageUrl')
+    : undefined;
 
-  const [view, setView] = useState<DocentesView>('galeria');
+  const [query, setQuery] = useState('');
+  const [specialty, setSpecialty] = useState<string | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(VIEW_STORAGE_KEY);
-    if (stored === 'galeria' || stored === 'mosaico') setView(stored);
-  }, []);
+  const { data: selectedTeacher } = useApiData(
+    () => (selectedSlug ? api.teacher(selectedSlug) : Promise.resolve(null)),
+    [selectedSlug],
+  );
+  const { data: allSubjects } = useApiData(() => api.subjects(), []);
 
-  function selectView(next: DocentesView) {
-    setView(next);
-    window.localStorage.setItem(VIEW_STORAGE_KEY, next);
-  }
+  const filtered = (teachers ?? []).filter((teacher) => {
+    const matchesQuery = `${teacher.fullName} ${teacher.title}`
+      .toLocaleLowerCase('es')
+      .includes(query.toLocaleLowerCase('es'));
+    const matchesSpecialty = !specialty || teacher.specialty === specialty;
+    return matchesQuery && matchesSpecialty;
+  });
+
+  const selectedSubjects = selectedTeacher
+    ? (allSubjects ?? []).filter((s) => selectedTeacher.subjectIds.includes(s.id))
+    : [];
 
   return (
-    <div>
+    <div className="interior-page faculty-page">
       <PageBanner
-        eyebrow="Nosotros"
-        title="Docentes"
-        imageUrl={heroImageUrl}
-        imageAlt="Cuerpo docente del Departamento de Sistemas y Computación"
+        sculpture="faculty"
+        eyebrow="Docentes"
+        title="El conocimiento tiene rostro."
+        imageUrl={heroImageUrl ?? '/images/comunidad.jpg'}
+        imageAlt="Fotografía editorial de colaboración y aprendizaje"
       />
 
-      <div className="mx-auto max-w-5xl px-6 py-16">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <p className="text-sm text-muted">El cuerpo académico que imparte las materias del departamento.</p>
+      <div className="page-width section-space">
+        <EditorialIntro title="Conoce a quienes te acompañan.">
+          <p>
+            Explora las áreas de especialidad de nuestros docentes y descubre su experiencia, las
+            materias que imparten y sus formas de contacto.
+          </p>
+        </EditorialIntro>
 
-          <div
-            role="group"
-            aria-label="Cambiar vista de docentes"
-            className="flex shrink-0 overflow-hidden rounded-md border border-line"
-          >
+        <div className="faculty-toolbar">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar docente por nombre…"
+            aria-label="Buscar docente"
+            className="w-full rounded-md border border-line bg-surface px-4 py-2.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal sm:max-w-xs"
+          />
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => selectView('mosaico')}
-              aria-pressed={view === 'mosaico'}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
-                view === 'mosaico' ? 'bg-primary text-surface' : 'text-muted hover:text-ink'
-              }`}
+              aria-pressed={specialty === null}
+              onClick={() => setSpecialty(null)}
+              className={specialty === null ? 'pill-gold-active' : 'pill-gold'}
             >
-              <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
-              Mosaico
+              Todas
             </button>
-            <button
-              type="button"
-              onClick={() => selectView('galeria')}
-              aria-pressed={view === 'galeria'}
-              className={`flex items-center gap-1.5 border-l border-line px-3 py-1.5 text-xs font-medium transition-colors ${
-                view === 'galeria' ? 'bg-primary text-surface' : 'text-muted hover:text-ink'
-              }`}
-            >
-              <Rows3 className="h-3.5 w-3.5" aria-hidden="true" />
-              Galería
-            </button>
+            {TEACHER_SPECIALTIES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={specialty === s}
+                onClick={() => setSpecialty(s)}
+                className={specialty === s ? 'pill-gold-active' : 'pill-gold'}
+              >
+                {s}
+              </button>
+            ))}
           </div>
         </div>
 
-        {!loading && teachers && teachers.length === 0 && (
-          <p className="mt-8 text-sm text-muted">Aún no hay docentes publicados.</p>
+        <p className="result-count" role="status">
+          {loading
+            ? 'CARGANDO DIRECTORIO…'
+            : `${filtered.length} DOCENTES / ${specialty ?? 'TODAS LAS ÁREAS'}`}
+        </p>
+        {!loading && filtered.length === 0 && (
+          <p className="mt-10 text-sm text-muted">No hay docentes que coincidan con la búsqueda.</p>
         )}
 
-        {view === 'galeria' ? (
-          <div className="mt-6 flex flex-col divide-y divide-line">
-            {(teachers ?? []).map((teacher, i) => (
-              <Reveal key={teacher.id} delayMs={(i % 6) * 40}>
-                <TeacherCard teacher={teacher} />
-              </Reveal>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-            {(teachers ?? []).map((teacher, i) => (
-              <Reveal key={teacher.id} delayMs={(i % 4) * 60}>
-                <TeacherCardGrid teacher={teacher} />
-              </Reveal>
-            ))}
-          </div>
-        )}
+        <div className="faculty-grid">
+          {filtered.map((teacher, i) => (
+            <Reveal key={teacher.id} delayMs={(i % 8) * 40}>
+              <TeacherCard teacher={teacher} onOpenDetail={setSelectedSlug} />
+            </Reveal>
+          ))}
+        </div>
       </div>
+
+      {selectedTeacher && (
+        <TeacherModal
+          teacher={selectedTeacher}
+          subjects={selectedSubjects}
+          onClose={() => setSelectedSlug(null)}
+        />
+      )}
     </div>
   );
 }

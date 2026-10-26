@@ -84,11 +84,27 @@ export interface Subject {
   code: string;
   name: string;
   semester: number;
+  credits: number | null;
+  theoryHours?: number | null;
+  practicalHours?: number | null;
+  academicSourceUrl?: string | null;
+  prerequisitesVerified?: boolean;
+  syllabus?: MediaAsset | null;
   objective: string;
   programId: string;
   teacherIds: string[];
   prerequisiteIds: string[];
 }
+
+/** Especialidades fijas para filtrar el directorio de docentes (sección "Docentes"). */
+export const TEACHER_SPECIALTIES = [
+  'Inteligencia Artificial',
+  'Desarrollo de Software',
+  'Redes y Sistemas',
+  'Bases de Datos y Cloud',
+] as const;
+
+export type TeacherSpecialty = (typeof TEACHER_SPECIALTIES)[number];
 
 export interface TeacherSummary {
   id: string;
@@ -96,6 +112,7 @@ export interface TeacherSummary {
   fullName: string;
   title: string;
   photo: MediaAsset | null;
+  specialty: string | null;
   isActive: boolean;
 }
 

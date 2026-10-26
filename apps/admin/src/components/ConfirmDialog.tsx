@@ -1,5 +1,13 @@
+import { useState } from 'react';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -20,25 +28,53 @@ export default function ConfirmDialog({
   destructive = true,
   onConfirm,
 }: ConfirmDialogProps) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        if (!busy) {
+          setError('');
+          onOpenChange(value);
+        }
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+        {error && (
+          <p role="alert" className="admin-alert">
+            {error}
+          </p>
+        )}
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button disabled={busy} variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
           <Button
+            disabled={busy}
             variant={destructive ? 'destructive' : 'default'}
             onClick={async () => {
-              await onConfirm();
-              onOpenChange(false);
+              setBusy(true);
+              setError('');
+              try {
+                await onConfirm();
+                onOpenChange(false);
+              } catch (e) {
+                setError(
+                  e instanceof Error
+                    ? e.message
+                    : 'No se pudo completar la acción. Intenta de nuevo.',
+                );
+              } finally {
+                setBusy(false);
+              }
             }}
           >
-            {confirmLabel}
+            {busy ? 'Procesando…' : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

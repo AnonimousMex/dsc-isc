@@ -1,5 +1,11 @@
 import { PrismaClient } from '@prisma/client';
+import { prismaDatasourceUrl } from './databaseConnection.js';
 
-// Instancia única compartida por toda la API (evita agotar conexiones de
-// SQLite al recargar módulos en desarrollo con tsx watch).
-export const prisma = new PrismaClient();
+const globalDatabase = globalThis as typeof globalThis & { iscPrisma?: PrismaClient };
+const databaseUrl = process.env.DATABASE_URL;
+export const prisma =
+  globalDatabase.iscPrisma ??
+  new PrismaClient({
+    ...(databaseUrl ? { datasources: { db: { url: prismaDatasourceUrl(databaseUrl) } } } : {}),
+  });
+if (process.env.NODE_ENV !== 'production') globalDatabase.iscPrisma = prisma;

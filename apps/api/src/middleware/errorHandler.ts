@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { MulterError } from 'multer';
 import { ZodError } from 'zod';
 import { env } from '../lib/env.js';
+import { isDatabaseConnectionError } from '../lib/databaseConnection.js';
 
 export class HttpError extends Error {
   constructor(
@@ -26,6 +27,18 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
   }
   if (err instanceof HttpError) {
     res.status(err.status).json({ error: err.message });
+    return;
+  }
+
+  if (isDatabaseConnectionError(err)) {
+    console.error('[database] Conexión temporalmente no disponible.');
+    res.setHeader('Retry-After', '5');
+    res
+      .status(503)
+      .json({
+        error:
+          'La conexión con la base de datos está temporalmente ocupada. Espera unos segundos e intenta de nuevo.',
+      });
     return;
   }
 

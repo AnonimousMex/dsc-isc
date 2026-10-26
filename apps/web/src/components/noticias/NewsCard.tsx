@@ -9,7 +9,7 @@ export default function NewsCard({ news }: NewsCardProps) {
   return (
     <Link
       to={`/noticias/${news.slug}`}
-      className="group block overflow-hidden rounded-lg border border-line bg-surface transition-shadow hover:shadow-md"
+      className="card-interactive group block overflow-hidden"
     >
       <div className="aspect-[16/9] w-full overflow-hidden bg-elevated">
         {news.coverImage && (

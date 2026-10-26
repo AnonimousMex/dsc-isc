@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { communitySectionSchema, type CommunitySection, type DscDocument } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
+import HeroImageField from '../components/HeroImageField';
 import MultiSelect from '../components/MultiSelect';
 import RichTextEditor from '../components/RichTextEditor';
 import { Button } from '../components/ui/button';
@@ -81,6 +82,8 @@ export default function Comunidad() {
         </div>
         <Button onClick={openCreate}>Nueva sección</Button>
       </div>
+
+      <HeroImageField configKey="comunidad.heroImageUrl" />
 
       <div className="mt-6">
         <DataTable

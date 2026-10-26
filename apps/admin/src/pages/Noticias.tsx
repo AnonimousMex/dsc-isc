@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { newsSchema, type News } from '@dsc-isc/shared';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
+import HeroImageField from '../components/HeroImageField';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import RichTextEditor from '../components/RichTextEditor';
 import { Button } from '../components/ui/button';
@@ -92,6 +93,8 @@ export default function Noticias() {
         <h1 className="text-2xl font-bold text-ink">Noticias</h1>
         <Button onClick={openCreate}>Nueva noticia</Button>
       </div>
+
+      <HeroImageField configKey="noticias.heroImageUrl" />
 
       <div className="mt-6">
         <DataTable

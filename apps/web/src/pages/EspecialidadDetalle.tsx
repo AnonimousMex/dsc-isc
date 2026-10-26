@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { resizeImageUrl } from '@dsc-isc/shared';
 import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
@@ -14,16 +14,19 @@ export default function EspecialidadDetalle() {
   if (error || !specialty) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-start justify-center px-6 py-32">
-        <SectionEyebrow>Posgrado</SectionEyebrow>
+        <SectionEyebrow>Especialidades</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-bold text-ink">Especialidad no encontrada</h1>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-24">
-      <Reveal>
-        <SectionEyebrow>Posgrado</SectionEyebrow>
+    <div className="detail-editorial page-width">
+      <Link to="/especialidades" className="text-sm text-accent underline">
+        ← Retículas y especialidades
+      </Link>
+      <Reveal className="mt-4">
+        <SectionEyebrow>Especialidades</SectionEyebrow>
         <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">{specialty.name}</h1>
       </Reveal>
 
