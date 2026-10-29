@@ -8,12 +8,16 @@ import Reveal from '../components/shared/Reveal';
 import SectionEyebrow from '../components/shared/SectionEyebrow';
 import { api } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
+import SubjectModal from '../components/reticula/SubjectModal';
 
 export default function DocenteDetalle() {
   const { slug = '' } = useParams<{ slug: string }>();
   const { data: teacher, loading, error } = useApiData(() => api.teacher(slug), [slug]);
   const { data: allSubjects } = useApiData(() => api.subjects(), []);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+  const { data: teachers } = useApiData(() => api.teachers(), []);
+  const selectedSubject = allSubjects?.find((s) => s.id === selectedSubjectId);
 
   if (loading) return null;
 
@@ -98,18 +102,29 @@ export default function DocenteDetalle() {
           <h2 className="text-lg font-bold text-ink">Materias que imparte</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {subjects.map((subject) => (
-              <span
+              <button
+                type="button"
                 key={subject.id}
-                className="rounded-full border border-line px-3 py-1 text-xs text-ink"
+                onClick={() => setSelectedSubjectId(subject.id)}
+                className="rounded-full border border-line px-3 py-1 text-left text-xs text-ink hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"
               >
-                {subject.code} · {subject.name}
-              </span>
+                {subject.code} · {subject.name} ↗
+              </button>
             ))}
           </div>
         </Reveal>
       )}
 
       <TeacherArticlesSection slug={teacher.slug} hasOpenAlexLink={Boolean(teacher.openAlexId)} />
+      {selectedSubject && (
+        <SubjectModal
+          subject={selectedSubject}
+          allSubjects={allSubjects ?? []}
+          teachersById={Object.fromEntries((teachers ?? []).map((t) => [t.id, t]))}
+          onClose={() => setSelectedSubjectId(null)}
+          onSelectPrerequisite={setSelectedSubjectId}
+        />
+      )}
 
       {videoOpen && teacher.youtubeUrl && (
         <VideoModal

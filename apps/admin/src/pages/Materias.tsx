@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ZodError } from 'zod';
-import { subjectSchema, type Program, type Subject } from '@dsc-isc/shared';
+import { subjectSchema, type Program, type Subject, type Specialty } from '@dsc-isc/shared';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DataTable from '../components/DataTable';
@@ -36,12 +36,16 @@ const emptyForm = {
   syllabus: null as MediaValue | null,
   objective: '',
   programId: '',
+  specialtyId: '',
+  isElective: false,
   prerequisiteIds: [] as string[],
 };
 
 export default function Materias() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [curriculum, setCurriculum] = useState('all');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -51,12 +55,14 @@ export default function Materias() {
 
   const load = async () => {
     setLoading(true);
-    const [subjectList, programList] = await Promise.all([
+    const [subjectList, programList, specialtyList] = await Promise.all([
       apiGet<Subject[]>('/subjects'),
       apiGet<Program[]>('/programs'),
+      apiGet<Specialty[]>('/specialties'),
     ]);
     setSubjects(subjectList);
     setPrograms(programList);
+    setSpecialties(specialtyList);
     setLoading(false);
   };
 
@@ -66,7 +72,11 @@ export default function Materias() {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm({ ...emptyForm, programId: programs[0]?.id ?? '' });
+    setForm({
+      ...emptyForm,
+      programId: programs[0]?.id ?? '',
+      specialtyId: !['all', 'general'].includes(curriculum) ? curriculum : '',
+    });
     setError(null);
     setDialogOpen(true);
   };
@@ -85,6 +95,8 @@ export default function Materias() {
       syllabus: subject.syllabus ? { id: subject.syllabus.id, url: subject.syllabus.url } : null,
       objective: subject.objective,
       programId: subject.programId,
+      specialtyId: subject.specialtyId ?? '',
+      isElective: subject.isElective ?? false,
       prerequisiteIds: subject.prerequisiteIds,
     });
     setError(null);
@@ -95,6 +107,7 @@ export default function Materias() {
     setError(null);
     const payload = {
       ...form,
+      specialtyId: form.specialtyId || null,
       theoryHours: form.theoryHours.trim() ? Number(form.theoryHours) : null,
       practicalHours: form.practicalHours.trim() ? Number(form.practicalHours) : null,
       academicSourceUrl: form.academicSourceUrl.trim() || null,
@@ -127,7 +140,12 @@ export default function Materias() {
     return s ? `${s.code} · ${s.name}` : id;
   };
 
-  const bySemester = [...subjects]
+  const filteredSubjects = subjects.filter(
+    (s) =>
+      curriculum === 'all' ||
+      (curriculum === 'general' ? !s.specialtyId : s.specialtyId === curriculum),
+  );
+  const bySemester = [...filteredSubjects]
     .sort((a, b) => a.semester - b.semester || a.code.localeCompare(b.code))
     .reduce<Record<number, Subject[]>>((acc, s) => {
       (acc[s.semester] ??= []).push(s);
@@ -148,8 +166,23 @@ export default function Materias() {
       </div>
 
       <div className="mt-6">
+        <Label htmlFor="curriculum">Filtrar retícula</Label>
+        <select
+          id="curriculum"
+          className="mb-4 ml-3 rounded border border-line bg-surface p-2 text-sm"
+          value={curriculum}
+          onChange={(e) => setCurriculum(e.target.value)}
+        >
+          <option value="all">Todas las materias</option>
+          <option value="general">Carrera (sin especialidad)</option>
+          {specialties.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
         <DataTable
-          data={subjects}
+          data={filteredSubjects}
           getRowId={(s) => s.id}
           emptyMessage={loading ? 'Cargando…' : 'Aún no hay materias.'}
           columns={[
@@ -160,6 +193,10 @@ export default function Materias() {
             },
             { header: 'Semestre', cell: (s) => s.semester },
             { header: 'Programa', cell: (s) => programName(s.programId) },
+            {
+              header: 'Especialidad',
+              cell: (s) => specialties.find((x) => x.id === s.specialtyId)?.name ?? 'Carrera',
+            },
             { header: 'Prerrequisitos', cell: (s) => s.prerequisiteIds.length },
           ]}
           actions={(s) => (
@@ -273,7 +310,7 @@ export default function Materias() {
               Horas semanales según la retícula. Deja vacío lo que aún no esté confirmado.
             </p>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="academicSourceUrl">Fuente de la información académica</Label>
+              <Label htmlFor="academicSourceUrl">Enlace al plan de estudios de esta materia</Label>
               <Input
                 id="academicSourceUrl"
                 type="url"
@@ -284,10 +321,38 @@ export default function Materias() {
             </div>
             <ImageUploader
               kind="DOCUMENT"
-              label="Temario o programa de la materia (PDF)"
+              label="Plan de estudios de la materia (PDF)"
               value={form.syllabus}
               onChange={(syllabus) => setForm({ ...form, syllabus })}
             />
+            <p className="text-xs text-muted">
+              Consultar fuente académica abrirá el PDF seleccionado; si no hay uno, abrirá el enlace
+              al plan de esta materia.
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="specialtyId">Retícula de especialidad</Label>
+              <select
+                id="specialtyId"
+                className="rounded-md border border-line bg-surface px-3 py-2 text-sm"
+                value={form.specialtyId}
+                onChange={(e) => setForm({ ...form, specialtyId: e.target.value })}
+              >
+                <option value="">Carrera (sin especialidad)</option>
+                {specialties.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <label className="flex items-center gap-3 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={form.isElective}
+                onChange={(e) => setForm({ ...form, isElective: e.target.checked })}
+              />
+              Materia optativa
+            </label>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="name">Nombre</Label>

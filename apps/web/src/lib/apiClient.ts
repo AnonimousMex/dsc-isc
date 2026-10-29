@@ -22,7 +22,11 @@ export async function registerGraduate(form: FormData): Promise<{ message: strin
   if (!res.ok) {
     const fieldErrors = body.details?.fieldErrors as Record<string, string[]> | undefined;
     const detail = fieldErrors ? Object.values(fieldErrors).flat()[0] : undefined;
-    throw new Error(res.status === 409 ? 'Ya existe una solicitud con ese correo. Contacta al departamento para actualizarla.' : detail ?? body.error ?? 'No se pudo enviar la solicitud');
+    throw new Error(
+      res.status === 409
+        ? 'Ya existe una solicitud con ese correo. Contacta al departamento para actualizarla.'
+        : (detail ?? body.error ?? 'No se pudo enviar la solicitud'),
+    );
   }
   return body;
 }
@@ -42,13 +46,17 @@ async function get<T>(path: string): Promise<T> {
  */
 export const api = {
   graduates: () => get<import('@dsc-isc/shared').GraduateProfile[]>('/graduates'),
-  graduate: (id: string) => get<import('@dsc-isc/shared').GraduateProfile>(`/graduates/${encodeURIComponent(id)}`),
+  graduate: (id: string) =>
+    get<import('@dsc-isc/shared').GraduateProfile>(`/graduates/${encodeURIComponent(id)}`),
   heroSlides: () => get<HeroSlide[]>('/hero-slides'),
   siteConfig: () => get<SiteConfig[]>('/site-config'),
   timeline: () => get<TimelineEvent[]>('/timeline'),
   programs: () => get<Program[]>('/programs'),
   program: (slug: string) => get<Program>(`/programs/${slug}`),
-  subjects: (programId?: string) => get<Subject[]>(programId ? `/subjects?programId=${programId}` : '/subjects'),
+  subjects: (programId?: string) =>
+    get<Subject[]>(programId ? `/subjects?programId=${programId}` : '/subjects'),
+  specialtySubjects: (specialtyId: string) =>
+    get<Subject[]>(`/subjects?specialtyId=${encodeURIComponent(specialtyId)}`),
   teachers: () => get<TeacherSummary[]>('/teachers'),
   teacher: (slug: string) => get<Teacher>(`/teachers/${slug}`),
   teacherArticles: (slug: string) => get<TeacherArticle[]>(`/teachers/${slug}/articles`),

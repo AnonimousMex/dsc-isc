@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { toMediaAssetDto } from '../lib/mediaDto.js';
 import { HttpError } from '../middleware/errorHandler.js';
 
-const include = { image: true } satisfies Prisma.SpecialtyInclude;
+const include = { image: true, reticulaPdf: true } satisfies Prisma.SpecialtyInclude;
 type SpecialtyRow = Prisma.SpecialtyGetPayload<{ include: typeof include }>;
 
 function toDto(row: SpecialtyRow): Specialty {
@@ -14,6 +14,8 @@ function toDto(row: SpecialtyRow): Specialty {
     name: row.name,
     description: row.description,
     image: row.image ? toMediaAssetDto(row.image) : null,
+    reticulaUrl: row.reticulaUrl,
+    reticulaPdf: row.reticulaPdf ? toMediaAssetDto(row.reticulaPdf) : null,
   };
 }
 
@@ -35,12 +37,15 @@ export async function getSpecialtyById(id: string): Promise<Specialty> {
 }
 
 export async function createSpecialty(input: SpecialtyInput): Promise<Specialty> {
+  await assertReticula(input.reticulaPdfId);
   const row = await prisma.specialty.create({
     data: {
       slug: input.slug,
       name: input.name,
       description: input.description,
       imageId: input.imageId || null,
+      reticulaUrl: input.reticulaUrl,
+      reticulaPdfId: input.reticulaPdfId,
     },
     include,
   });
@@ -48,6 +53,7 @@ export async function createSpecialty(input: SpecialtyInput): Promise<Specialty>
 }
 
 export async function updateSpecialty(id: string, input: SpecialtyInput): Promise<Specialty> {
+  await assertReticula(input.reticulaPdfId);
   const row = await prisma.specialty.update({
     where: { id },
     data: {
@@ -55,6 +61,8 @@ export async function updateSpecialty(id: string, input: SpecialtyInput): Promis
       name: input.name,
       description: input.description,
       imageId: input.imageId || null,
+      reticulaUrl: input.reticulaUrl,
+      reticulaPdfId: input.reticulaPdfId,
     },
     include,
   });
@@ -62,5 +70,17 @@ export async function updateSpecialty(id: string, input: SpecialtyInput): Promis
 }
 
 export async function deleteSpecialty(id: string): Promise<void> {
+  if (await prisma.subject.count({ where: { specialtyId: id } }))
+    throw new HttpError(
+      409,
+      'Reasigna o elimina las materias de esta especialidad antes de eliminarla.',
+    );
   await prisma.specialty.delete({ where: { id } });
+}
+
+async function assertReticula(id?: string | null) {
+  if (!id) return;
+  const media = await prisma.mediaAsset.findUnique({ where: { id } });
+  if (!media || media.kind !== 'DOCUMENT')
+    throw new HttpError(400, 'Selecciona un documento válido para la retícula.');
 }

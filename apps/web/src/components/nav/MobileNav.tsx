@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useMotionSettings } from '../motion/MotionExperience';
 
 interface MobileNavProps {
   items: Array<{ label: string; href: string }>;
@@ -15,6 +16,7 @@ const MORE_LINKS = [
 ];
 
 export default function MobileNav({ items, onClose }: MobileNavProps) {
+  const { enabled } = useMotionSettings();
   const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -49,7 +51,7 @@ export default function MobileNav({ items, onClose }: MobileNavProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: enabled ? 0.2 : 0 }}
       className="fixed inset-0 z-50 overflow-y-auto bg-deep px-6 py-8 text-ink lg:hidden"
       role="dialog"
       aria-modal="true"

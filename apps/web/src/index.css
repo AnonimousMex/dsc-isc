@@ -69,7 +69,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  html:not([data-motion='playing']) .reveal {
     opacity: 1;
     transform: none;
     transition: none;
@@ -983,12 +983,12 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html:not([data-motion='playing']) {
     scroll-behavior: auto;
   }
-  *,
-  *:before,
-  *:after {
+  html:not([data-motion='playing']) *,
+  html:not([data-motion='playing']) *:before,
+  html:not([data-motion='playing']) *:after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
@@ -1865,6 +1865,12 @@ body {
   background: #181d23;
   border-top: 1px solid #ffffff20;
 }
+.curriculum-section .section-heading > div {
+  flex-shrink: 0;
+}
+.curriculum-section .section-heading > p {
+  max-width: 480px;
+}
 .curriculum-section .card-interactive {
   background: #222930;
   padding: 26px;
@@ -2419,7 +2425,7 @@ body {
   transition-duration: 600ms;
 }
 @media (prefers-reduced-motion: reduce) {
-  .interior-main .reveal.is-visible {
+  html:not([data-motion='playing']) .interior-main .reveal.is-visible {
     transition: none;
   }
 }
@@ -3450,11 +3456,11 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tilt-plane {
+  html:not([data-motion='playing']) .tilt-plane {
     transform: none !important;
   }
-  .degree-panel:hover,
-  .pathway:hover {
+  html:not([data-motion='playing']) .degree-panel:hover,
+  html:not([data-motion='playing']) .pathway:hover {
     transform: none;
   }
 }
@@ -4213,8 +4219,8 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .scroll-entrance,
-  .reveal[data-reveal] {
+  html:not([data-motion='playing']) .scroll-entrance,
+  html:not([data-motion='playing']) .reveal[data-reveal] {
     opacity: 1;
     transform: none !important;
     transition: none;
@@ -4262,7 +4268,7 @@ body {
   transform: translateY(-2px);
 }
 @media (prefers-reduced-motion: reduce) {
-  .footer-institutional-logos img:hover {
+  html:not([data-motion='playing']) .footer-institutional-logos img:hover {
     transform: none;
   }
 }

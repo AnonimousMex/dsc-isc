@@ -8,3 +8,4 @@ export * from './theme.js';
 export * from './graduates.js';
 
 export * from './presentation.js';
+export * from './academic.js';

@@ -4,6 +4,7 @@ import { useDialogFocus } from '../../lib/useDialogFocus';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { Subject, TeacherSummary } from '@dsc-isc/shared';
+import { subjectAcademicUrl } from '@dsc-isc/shared';
 
 interface SubjectModalProps {
   subject: Subject;
@@ -27,6 +28,7 @@ export default function SubjectModal({
   useEffect(() => setTab(0), [subject.id]);
   const prerequisites = allSubjects.filter((s) => subject.prerequisiteIds.includes(s.id));
   const teachers = subject.teacherIds.map((id) => teachersById[id]).filter(Boolean);
+  const academicUrl = subjectAcademicUrl(subject);
   return (
     <motion.div
       className="editorial-modal-backdrop fixed inset-0 z-50 flex items-center justify-center px-4"
@@ -47,6 +49,7 @@ export default function SubjectModal({
           <div>
             <p className="font-mono text-xs uppercase tracking-widest text-muted">
               {subject.code} · Semestre {subject.semester}
+              {subject.isElective ? ' · Optativa' : ''}
             </p>
             <h3 id={`${uid}-title`} className="mt-2 text-xl font-bold text-ink">
               {subject.name}
@@ -128,25 +131,20 @@ export default function SubjectModal({
                 publicación.
               </p>
               <div className="mt-5 flex flex-wrap gap-4 text-sm text-primary">
-                {subject.syllabus && (
+                {academicUrl && (
                   <a
-                    href={subject.syllabus.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    Descargar temario PDF ↗
-                  </a>
-                )}
-                {subject.academicSourceUrl && (
-                  <a
-                    href={subject.academicSourceUrl}
+                    href={academicUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline"
                   >
                     Consultar fuente académica ↗
                   </a>
+                )}
+                {!academicUrl && (
+                  <p className="text-xs text-muted">
+                    El plan de estudios de esta materia está pendiente de publicación.
+                  </p>
                 )}
               </div>
             </>
@@ -186,6 +184,7 @@ export default function SubjectModal({
                   <Link
                     key={t.id}
                     to={`/docentes/${t.slug}`}
+                    onClick={onClose}
                     className="rounded border border-line/20 p-3 text-sm text-ink hover:border-primary hover:text-primary"
                   >
                     {t.fullName} ↗

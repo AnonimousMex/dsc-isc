@@ -136,27 +136,37 @@ export default function MotionExperience({ children }: { children: ReactNode }) 
     preference.addEventListener('change', update);
     return () => preference.removeEventListener('change', update);
   }, []);
-  const [paused, setPaused] = useState(() => {
+  const [preference, setPreference] = useState<'playing' | 'paused' | null>(() => {
     try {
-      return localStorage.getItem('isc:motion') === 'paused';
+      const saved = localStorage.getItem('isc:motion');
+      return saved === 'playing' || saved === 'paused' ? saved : null;
     } catch {
-      return false;
+      return null;
     }
   });
-  const enabled = !paused && !reduced && motion.enabled;
+  const enabled = motion.enabled && (preference === 'playing' || (preference === null && !reduced));
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.getAttribute('data-motion');
+    root.setAttribute('data-motion', enabled ? 'playing' : 'paused');
+    return () => {
+      if (previous === null) root.removeAttribute('data-motion');
+      else root.setAttribute('data-motion', previous);
+    };
+  }, [enabled]);
   function toggle() {
-    setPaused((value) => {
-      try {
-        localStorage.setItem('isc:motion', value ? 'playing' : 'paused');
-      } catch {
-        /* La preferencia funciona sin almacenamiento. */
-      }
-      return !value;
-    });
+    const next = enabled ? 'paused' : 'playing';
+    setPreference(next);
+    try {
+      localStorage.setItem('isc:motion', next);
+    } catch {
+      /* La preferencia funciona sin almacenamiento. */
+    }
   }
   return (
     <MotionSettings.Provider value={{ enabled }}>
-      <MotionConfig reducedMotion={enabled ? 'user' : 'always'}>
+      {/* Components use the live motion context; Framer caches reducedMotion on mount. */}
+      <MotionConfig reducedMotion="never" transition={enabled ? undefined : { duration: 0 }}>
         <div
           className="experience-root"
           data-motion={enabled ? 'playing' : 'paused'}
@@ -170,11 +180,18 @@ export default function MotionExperience({ children }: { children: ReactNode }) 
               type="button"
               className="motion-toggle"
               onClick={toggle}
-              disabled={!!reduced || !motion.enabled}
-              aria-pressed={paused || !!reduced}
+              disabled={!motion.enabled}
+              aria-pressed={enabled}
+              title={
+                !motion.enabled
+                  ? 'Las animaciones están desactivadas en la configuración del portal'
+                  : reduced && preference === null
+                    ? 'Tu dispositivo prefiere movimiento reducido. Puedes activar las animaciones aquí.'
+                    : undefined
+              }
               aria-label={
-                reduced
-                  ? 'Movimiento reducido según tu dispositivo'
+                !motion.enabled
+                  ? 'Movimiento desactivado por el administrador'
                   : enabled
                     ? 'Pausar animaciones decorativas'
                     : 'Activar animaciones decorativas'
@@ -182,8 +199,8 @@ export default function MotionExperience({ children }: { children: ReactNode }) 
             >
               {enabled ? <Pause size={13} /> : <Play size={13} />}
               <span>
-                {reduced
-                  ? 'Movimiento reducido'
+                {!motion.enabled
+                  ? 'Movimiento desactivado'
                   : enabled
                     ? 'Pausar movimiento'
                     : 'Activar movimiento'}

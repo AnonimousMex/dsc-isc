@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toYoutubeEmbedUrl } from '@dsc-isc/shared';
+import { useMotionSettings } from '../motion/MotionExperience';
 
 interface VideoModalProps {
   youtubeUrl: string;
@@ -13,6 +14,7 @@ interface VideoModalProps {
  * 10.4: "lazy-load del iframe, nunca cargarlo hasta que se abre").
  */
 export default function VideoModal({ youtubeUrl, title, onClose }: VideoModalProps) {
+  const { enabled } = useMotionSettings();
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -31,10 +33,10 @@ export default function VideoModal({ youtubeUrl, title, onClose }: VideoModalPro
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
+          initial={{ opacity: 0, scale: enabled ? 0.96 : 1 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          transition={{ duration: 0.2 }}
+          exit={{ opacity: 0, scale: enabled ? 0.96 : 1 }}
+          transition={{ duration: enabled ? 0.2 : 0 }}
           className="aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-ink"
           onClick={(event) => event.stopPropagation()}
         >

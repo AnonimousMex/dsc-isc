@@ -118,6 +118,7 @@ model MediaAsset {
   documents  Document[]
   news       News[]
   subjectSyllabi Subject[] @relation("subjectSyllabus")
+  specialtyReticulas Specialty[] @relation("specialtyReticulaPdf")
 }
 
 model HeroSlide {
@@ -173,9 +174,14 @@ model Subject {
   objective     String
   program       Program                @relation(fields: [programId], references: [id])
   programId     String
+  specialtyId   String?
+  specialty     Specialty? @relation(fields: [specialtyId], references: [id], onDelete: Restrict)
+  isElective    Boolean @default(false)
   teachers      TeacherSubject[]
   prerequisites SubjectPrerequisite[]  @relation("subject")
   requiredBy    SubjectPrerequisite[]  @relation("prerequisite")
+
+  @@index([specialtyId])
 }
 
 model SubjectPrerequisite {
@@ -258,6 +264,10 @@ model Specialty {
   description String
   imageId     String?
   image       MediaAsset? @relation(fields: [imageId], references: [id])
+  reticulaUrl String?
+  reticulaPdfId String?
+  reticulaPdf MediaAsset? @relation("specialtyReticulaPdf", fields: [reticulaPdfId], references: [id], onDelete: SetNull)
+  subjects Subject[]
 }
 
 model Document {

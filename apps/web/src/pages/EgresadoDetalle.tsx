@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import GraduateAvatar from '../components/egresados/GraduateAvatar';
+import EmailContact from '../components/shared/EmailContact';
 import { api } from '../lib/apiClient';
 import { useApiData } from '../lib/useApiData';
 
@@ -41,11 +42,7 @@ export default function EgresadoDetalle() {
             {graduate.city ? ` · ${graduate.city}` : ''}
           </p>
           <div className="mt-5 flex flex-wrap gap-4 text-sm text-accent">
-            {graduate.email && (
-              <a href={`mailto:${graduate.email}`} className="underline">
-                Correo
-              </a>
-            )}
+            {graduate.email && <EmailContact key={graduate.email} email={graduate.email} />}
             {(['website', 'linkedin', 'github', 'facebook', 'instagram'] as const).map(
               (key) =>
                 graduate[key] && (

@@ -14,6 +14,7 @@
     "pretest": "npm run build -w @dsc-isc/shared && prisma generate",
     "test": "vitest run",
     "prisma:generate": "prisma generate",
+    "academic:import": "tsx prisma/importPortalCurricula.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts"
   },

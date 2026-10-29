@@ -6,12 +6,25 @@ import DataTable from '../components/DataTable';
 import HeroImageField from '../components/HeroImageField';
 import ImageUploader, { type MediaValue } from '../components/ImageUploader';
 import { Button } from '../components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { apiDelete, apiGet, apiPost, apiPut, ApiError } from '../lib/apiClient';
 
-const emptyForm = { slug: '', name: '', description: '', image: null as MediaValue | null };
+const emptyForm = {
+  slug: '',
+  name: '',
+  description: '',
+  image: null as MediaValue | null,
+  reticulaUrl: '',
+  reticulaPdf: null as MediaValue | null,
+};
 
 export default function Especialidades() {
   const [items, setItems] = useState<Specialty[]>([]);
@@ -46,6 +59,8 @@ export default function Especialidades() {
       name: item.name,
       description: item.description,
       image: item.image ? { id: item.image.id, url: item.image.url } : null,
+      reticulaUrl: item.reticulaUrl ?? '',
+      reticulaPdf: item.reticulaPdf ? { id: item.reticulaPdf.id, url: item.reticulaPdf.url } : null,
     });
     setError(null);
     setDialogOpen(true);
@@ -58,11 +73,15 @@ export default function Especialidades() {
       name: form.name,
       description: form.description,
       imageId: form.image?.id ?? null,
+      reticulaUrl: form.reticulaUrl.trim() || null,
+      reticulaPdfId: form.reticulaPdf?.id ?? null,
     };
     try {
       specialtySchema.parse(payload);
     } catch (err) {
-      setError(err instanceof ZodError ? (err.issues[0]?.message ?? 'Datos inválidos') : 'Datos inválidos');
+      setError(
+        err instanceof ZodError ? (err.issues[0]?.message ?? 'Datos inválidos') : 'Datos inválidos',
+      );
       return;
     }
     try {
@@ -90,7 +109,10 @@ export default function Especialidades() {
           getRowId={(s) => s.id}
           emptyMessage={loading ? 'Cargando…' : 'Aún no hay especialidades.'}
           columns={[
-            { header: 'Nombre', cell: (s) => <span className="font-medium text-ink">{s.name}</span> },
+            {
+              header: 'Nombre',
+              cell: (s) => <span className="font-medium text-ink">{s.name}</span>,
+            },
             { header: 'Slug', cell: (s) => <span className="font-mono text-xs">{s.slug}</span> },
           ]}
           actions={(s) => (
@@ -116,11 +138,19 @@ export default function Especialidades() {
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="name">Nombre</Label>
-                <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="slug">Slug (URL)</Label>
-                <Input id="slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                <Input
+                  id="slug"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                />
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -133,7 +163,31 @@ export default function Especialidades() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </div>
-            <ImageUploader value={form.image} onChange={(image) => setForm({ ...form, image })} label="Imagen" />
+            <ImageUploader
+              value={form.image}
+              onChange={(image) => setForm({ ...form, image })}
+              label="Imagen"
+            />
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="reticulaUrl">Enlace a la retícula oficial</Label>
+              <Input
+                id="reticulaUrl"
+                type="url"
+                placeholder="https://..."
+                value={form.reticulaUrl}
+                onChange={(e) => setForm({ ...form, reticulaUrl: e.target.value })}
+              />
+            </div>
+            <ImageUploader
+              kind="DOCUMENT"
+              label="Retícula de la especialidad (PDF)"
+              value={form.reticulaPdf}
+              onChange={(reticulaPdf) => setForm({ ...form, reticulaPdf })}
+            />
+            <p className="text-xs text-muted">
+              Administra las asignaturas, semestres, docentes y planes individuales desde Materias y
+              retícula, seleccionando esta especialidad.
+            </p>
             {error && (
               <p role="alert" className="text-sm text-red-600">
                 {error}

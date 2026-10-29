@@ -92,6 +92,8 @@ export interface Subject {
   syllabus?: MediaAsset | null;
   objective: string;
   programId: string;
+  specialtyId?: string | null;
+  isElective?: boolean;
   teacherIds: string[];
   prerequisiteIds: string[];
 }
@@ -173,6 +175,8 @@ export interface Specialty {
   name: string;
   description: string;
   image: MediaAsset | null;
+  reticulaUrl?: string | null;
+  reticulaPdf?: MediaAsset | null;
 }
 
 export interface DscDocument {

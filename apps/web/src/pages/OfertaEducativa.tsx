@@ -106,7 +106,7 @@ export default function OfertaEducativa() {
           </Reveal>
         )}
         <Reveal>
-          <SystemsExplorer subjects={subjects ?? []} />
+          <SystemsExplorer subjects={(subjects ?? []).filter((s) => !s.specialtyId)} />
         </Reveal>
         <Reveal className="program-goals">
           <span className="section-kicker">EL HORIZONTE</span>
@@ -154,9 +154,18 @@ export default function OfertaEducativa() {
                 <Download size={18} /> Descargar retícula PDF
               </a>
             )}
+            <Link
+              to="/especialidades"
+              className="inline-flex items-center gap-2 rounded border border-primary/40 px-5 py-3 text-primary hover:bg-primary/10"
+            >
+              Ver especialidades <ArrowUpRight size={18} />
+            </Link>
           </Reveal>
           <Reveal>
-            <SemesterReticula subjects={subjects ?? []} teachersById={teachersById} />
+            <SemesterReticula
+              subjects={(subjects ?? []).filter((s) => !s.specialtyId)}
+              teachersById={teachersById}
+            />
           </Reveal>
         </div>
       </section>

@@ -7,7 +7,8 @@ import * as subjectService from '../services/subjectService.js';
 
 export const listSubjects = asyncHandler(async (req: Request, res: Response) => {
   const programId = typeof req.query.programId === 'string' ? req.query.programId : undefined;
-  res.json(await subjectService.listSubjects(programId));
+  const specialtyId = typeof req.query.specialtyId === 'string' ? req.query.specialtyId : undefined;
+  res.json(await subjectService.listSubjects(programId, specialtyId));
 });
 
 export const getSubject = asyncHandler(async (req: Request, res: Response) => {

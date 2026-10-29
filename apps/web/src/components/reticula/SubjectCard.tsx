@@ -28,6 +28,7 @@ export default function SubjectCard({ subject, onSelect }: SubjectCardProps) {
         )}
       </div>
       <h3 className="mt-2 font-bold leading-snug text-ink">{subject.name}</h3>
+      {subject.isElective && <span className="mt-2 text-xs text-primary">Optativa</span>}
 
       <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out group-hover:grid-rows-[1fr]">
         <div className="overflow-hidden">

@@ -123,11 +123,18 @@ export const subjectSchema = z.object({
   credits: z.number().int().min(0).max(60).nullable().optional(),
   theoryHours: z.number().int().min(0).max(40).nullable().optional(),
   practicalHours: z.number().int().min(0).max(40).nullable().optional(),
-  academicSourceUrl: z.string().url().refine(value => /^https?:\/\//.test(value), 'Usa un enlace HTTP o HTTPS.').nullable().optional(),
+  academicSourceUrl: z
+    .string()
+    .url()
+    .refine((value) => /^https?:\/\//.test(value), 'Usa un enlace HTTP o HTTPS.')
+    .nullable()
+    .optional(),
   prerequisitesVerified: z.boolean().optional(),
   syllabusMediaId: z.string().min(1).nullable().optional(),
   objective: z.string().max(2000),
   programId: z.string().min(1),
+  specialtyId: z.string().min(1).nullable().optional(),
+  isElective: z.boolean().optional(),
   prerequisiteIds: z.array(z.string()).default([]),
 });
 
@@ -158,6 +165,13 @@ export const specialtySchema = z.object({
   name: z.string().min(2).max(160),
   description: z.string().max(4000),
   imageId: z.string().nullable().optional(),
+  reticulaUrl: z
+    .string()
+    .url()
+    .refine((value) => /^https?:\/\//.test(value), 'Usa un enlace HTTP o HTTPS.')
+    .nullable()
+    .optional(),
+  reticulaPdfId: z.string().min(1).nullable().optional(),
 });
 
 export const documentSchema = z.object({

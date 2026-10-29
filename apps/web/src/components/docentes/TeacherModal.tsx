@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Globe } from 'lucide-react';
 import type { Subject, Teacher } from '@dsc-isc/shared';
 import TeacherAvatar from './TeacherAvatar';
+import { useMotionSettings } from '../motion/MotionExperience';
 
 interface TeacherModalProps {
   teacher: Teacher;
@@ -21,6 +22,7 @@ interface TeacherModalProps {
 export default function TeacherModal({ teacher, subjects, onClose }: TeacherModalProps) {
   const { email, website } = teacher;
   const dialogRef = useDialogFocus(onClose);
+  const { enabled } = useMotionSettings();
 
   return (
     <AnimatePresence>
@@ -32,10 +34,10 @@ export default function TeacherModal({ teacher, subjects, onClose }: TeacherModa
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: enabled ? 16 : 0 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 16 }}
-          transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+          exit={{ opacity: 0, y: enabled ? 16 : 0 }}
+          transition={{ duration: enabled ? 0.2 : 0, ease: [0.22, 0.61, 0.36, 1] }}
           className="editorial-modal w-full max-w-md border border-line/20 bg-surface p-6"
           ref={dialogRef}
           role="dialog"

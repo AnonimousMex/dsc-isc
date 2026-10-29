@@ -25,14 +25,16 @@ function toDto(row: SubjectRow): Subject {
     syllabus: row.syllabus ? toMediaAssetDto(row.syllabus) : null,
     objective: row.objective,
     programId: row.programId,
+    specialtyId: row.specialtyId,
+    isElective: row.isElective,
     teacherIds: row.teachers.map((t) => t.teacherId),
     prerequisiteIds: row.prerequisites.map((p) => p.prerequisiteId),
   };
 }
 
-export async function listSubjects(programId?: string): Promise<Subject[]> {
+export async function listSubjects(programId?: string, specialtyId?: string): Promise<Subject[]> {
   const rows = await prisma.subject.findMany({
-    where: programId ? { programId } : undefined,
+    where: { ...(programId ? { programId } : {}), ...(specialtyId ? { specialtyId } : {}) },
     include,
     orderBy: [{ semester: 'asc' }, { code: 'asc' }],
   });
@@ -85,6 +87,8 @@ export async function createSubject(input: SubjectInput): Promise<Subject> {
       syllabusMediaId: input.syllabusMediaId,
       objective: input.objective,
       programId: input.programId,
+      specialtyId: input.specialtyId,
+      isElective: input.isElective,
     },
   });
   if (input.prerequisiteIds.length > 0) {
@@ -117,6 +121,8 @@ export async function updateSubject(id: string, input: SubjectInput): Promise<Su
         syllabusMediaId: input.syllabusMediaId,
         objective: input.objective,
         programId: input.programId,
+        specialtyId: input.specialtyId,
+        isElective: input.isElective,
       },
     }),
     prisma.subjectPrerequisite.deleteMany({ where: { subjectId: id } }),
